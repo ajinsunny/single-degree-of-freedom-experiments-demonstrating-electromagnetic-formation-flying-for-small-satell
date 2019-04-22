@@ -79,13 +79,9 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
-  while (Serial.available() == 0) {}
-    incomingByte = Serial.read();
-    Serial.println(incomingByte);
-    
-    if(incomingByte == 'A')
-{
-    Serial.print("Initializing SD card...");
+  
+
+  Serial.print("Initializing SD card...");
   
     // see if the card is present and can be initialized:
     if (!SD.begin(4)) {
@@ -94,7 +90,7 @@ void setup() {
       while (1);
     }
     Serial.println("card initialized.");
-}
+
   Wire.begin();
   //Set I2C sub-device address
   sensor.begin(0x50);
@@ -102,6 +98,11 @@ void setup() {
   sensor.setMode(Continuous, High);
   //Laser rangefinder begins to work
   sensor.start();
+  myFile = SD.open("sat1.csv", FILE_WRITE);
+  while (Serial.available() == 0) {}
+    incomingByte = Serial.read();
+    Serial.println(incomingByte);
+
   //delay(20000);
 
 }
@@ -131,7 +132,8 @@ void setup() {
 
 void loop()
 {
-  myFile = SD.open("sat1.csv", FILE_WRITE);
+  if(incomingByte == 'A')
+  {
   while (millis() < period)
   {
     if(myFile)
@@ -163,6 +165,7 @@ void loop()
     }
     A = feedback_algorithm(dist[i], vel);
     S.stopSinusoid();    
+  }
   }
   }
   myFile.close();
