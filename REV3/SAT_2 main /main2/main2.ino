@@ -134,8 +134,8 @@ void loop()
   {
     if(myFile)
     {
-    S.startSinusoid(100,A);
-    delay(36);
+    S.startSinusoid(10,A);
+    delay(84);
     Serial.print("Voltage value: ");
     Serial.println(S.return_voltage());
     dist[i] = (sensor.getDistance()/1000)+0.2;
