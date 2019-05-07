@@ -9,7 +9,7 @@
 
 char incomingByte;
 DFRobotVL53L0X sensor;
-unsigned long period = 700000000; 
+unsigned long period = 70000; 
 float dist[2];
 unsigned int i = 0;
 float vel = 0;
@@ -24,6 +24,28 @@ void setup()
   pinMode(9, OUTPUT);
   Serial.begin(115200);
   //delay(20000);
+while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+  
+
+  Serial.print("Initializing SD card...");
+  
+    // see if the card is present and can be initialized:
+    if (!SD.begin(4)) {
+      Serial.println("Card failed, or not present");
+      // don't do anything more:
+      while (1);
+    }
+    Serial.println("card initialized.");
+
+  Wire.begin();
+  //Set I2C sub-device address
+  sensor.begin(0x50);
+  //Set to Back-to-back mode and high precision mode
+  sensor.setMode(Continuous, High);
+  //Laser rangefinder begins to work
+  sensor.start();
   myFile = SD.open("sat2.csv", FILE_WRITE);
   while(Serial.available()==0){}
   incomingByte = Serial.read();
@@ -37,9 +59,10 @@ void loop()
 { 
   while(millis() < period) 
   {
-    //if(myFile)
+    if(myFile)
     {
     S.startSinusoid1(10);
+    delay(84);
     Serial.print("Voltage value: ");
     Serial.println(S.return_voltage());
     dist[i] = (sensor.getDistance()/1000)+0.2;
@@ -59,16 +82,15 @@ void loop()
     {
       i = 0;
     }
-
-
     
-    delay(1000);
+    //delay(1000);
     S.stopSinusoid();
     }
   }
     myFile.close();
     exit(0);
-}    
+}
+    
 //    sw.playTone2(1000, 1200);
 //    delay(1000);
 //    sw.stopTone();
