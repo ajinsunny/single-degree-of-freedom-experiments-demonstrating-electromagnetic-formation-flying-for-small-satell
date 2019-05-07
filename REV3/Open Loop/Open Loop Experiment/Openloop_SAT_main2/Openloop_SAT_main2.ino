@@ -24,7 +24,8 @@ void setup()
   pinMode(9, OUTPUT);
   Serial.begin(115200);
   //delay(20000);
-while (!Serial) {
+  while (!Serial) 
+  {
     ; // wait for serial port to connect. Needed for native USB port only
   }
   
