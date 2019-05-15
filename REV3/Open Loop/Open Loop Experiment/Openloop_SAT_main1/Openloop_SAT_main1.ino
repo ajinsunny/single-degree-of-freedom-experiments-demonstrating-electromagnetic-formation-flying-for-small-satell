@@ -9,14 +9,16 @@
 
 char incomingByte;
 DFRobotVL53L0X sensor;
-unsigned long period = 70000; 
-float dist[2];
-unsigned int i = 0;
-float vel = 0;
-float velocity; 
-float delta_pos;
+unsigned long period = 30000; 
+double dist[3]={0.0,0.0,0.0};
+unsigned int i = 1;
+double vel = 0.0;
+double velocity = 0.0; 
+double delta_pos = 0.0;
 File myFile;
-void setup()  { 
+
+void setup()  
+{ 
   analogReadResolution(10);
   analogWriteResolution(10);
   pinMode(9, OUTPUT);
@@ -46,6 +48,9 @@ void setup()  {
   //Laser rangefinder begins to work
   sensor.start();
   myFile = SD.open("sat1.csv", FILE_WRITE);
+  myFile.print("Distance");
+  myFile.print(",");
+  myFile.println("Velocity"); 
   while(Serial.available()==0){}
   incomingByte = Serial.read();
   if(incomingByte == 'A')
@@ -55,35 +60,37 @@ void setup()  {
 
 } 
 
-void loop()  { 
-  
+void loop()  
+{   
   while(millis() < period) 
   {
     if(myFile)
     {
-    S.startSinusoid1(10);
-    delay(84);
-    Serial.print("Voltage value: ");
-    Serial.println(S.return_voltage());
-    dist[i] = (sensor.getDistance()/1000)+0.2;
+    S.startSinusoid1(20);
+    delay(87);
+//    //Serial.print("Voltage value: ");
+//    //Serial.println(S.return_voltage());
+    dist[i] = (sensor.getDistance()/10)+20;
+   // i++;
     vel = velocity_func(dist);
-    Serial.print("Distance: ");
+//    //Serial.print("Distance: ");
     Serial.println(dist[i]);
     myFile.print(dist[i]);
     myFile.print(",");
+    i++;
     Serial.print("Velocity: ");
     Serial.println(vel);
-    myFile.print(vel);
-    myFile.print(",");
-    i++;
-
-    
-    if (i >= 2)
+    myFile.println(vel);
+//    myFile.print(",");
+//
+//    
+    if (i == 3)
     {
-      i = 0;
+      dist[0] = dist[i-1];
+      i = 1;
     }
-    
-    //delay(1000);
+//    
+//    //delay(1000);
     S.stopSinusoid();
     }
   }
@@ -93,7 +100,7 @@ void loop()  {
 
 
 
-float velocity_func(float dist[2])
+double velocity_func(double dist[2])
 {
   delta_pos = dist[i] - dist[i - 1];
   velocity = delta_pos/0.016;
