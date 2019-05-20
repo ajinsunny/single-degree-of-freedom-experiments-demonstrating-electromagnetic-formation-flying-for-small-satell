@@ -1,3 +1,19 @@
+
+/*
+   Small Satellite Position Control Software.
+   Filename: Open_Loop_SAT1_main.ino
+   Author: Ajin Sunny
+   Last Modified by: Ajin Sunny
+
+
+   Written for Thesis: One dimensional Electromagnetic Actuation and Pulse Sensing.
+   Version: 1.0
+   Date: 02-25-2019
+
+
+*/
+
+
 #include <DueTimer.h>
 #include <SineWaveDue.h>
 #include <SD.h>
@@ -12,9 +28,12 @@ DFRobotVL53L0X sensor;
 unsigned long period = 30000; 
 double dist[3]={0.0,0.0,0.0};
 unsigned int i = 1;
-double vel = 0.0;
-double velocity = 0.0; 
-double delta_pos = 0.0;
+double V_final = 0.0;
+double velocity_final = 0.0;
+double vel[3] = {0.0,0.0,0.0};
+double previous_velocity = 0.0;
+double current_velocity = 0.0;
+double a = 0.5;
 File myFile;
 
 void setup()  
@@ -66,22 +85,24 @@ void loop()
   {
     if(myFile)
     {
-    S.startSinusoid1(20);
+    S.startSinusoid1(100);
     delay(87);
 //    //Serial.print("Voltage value: ");
 //    //Serial.println(S.return_voltage());
     dist[i] = (sensor.getDistance()/10)+20;
    // i++;
-    vel = velocity_func(dist);
-//    //Serial.print("Distance: ");
+    V_final = velocity_func(dist);
+    Serial.print("Distance: ");
     Serial.println(dist[i]);
     myFile.print(dist[i]);
     myFile.print(",");
     i++;
     Serial.print("Velocity: ");
-    Serial.println(vel);
-    myFile.println(vel);
-//    myFile.print(",");
+    Serial.println(V_final);
+    myFile.print(V_final);
+    myFile.print(",");
+   // myFile.print("Time: ");
+    myFile.println(millis());
 //
 //    
     if (i == 3)
@@ -95,16 +116,26 @@ void loop()
     }
   }
     myFile.close();
+    //SD.remove("sat1.csv")
     exit(0);
 } 
 
 
+//double velocity_func(double dist[2])
+//{
+//  delta_pos = dist[i] - dist[i - 1];
+//  velocity = delta_pos/0.016;
+//  return velocity;
+//}
+
 
 double velocity_func(double dist[2])
-{
-  delta_pos = dist[i] - dist[i - 1];
-  velocity = delta_pos/0.016;
-  return velocity;
+{ 
+  vel[i] = (dist[i] - dist[i - 1])/0.016;
+  current_velocity = vel[i];
+  previous_velocity = vel[i-1];
+  velocity_final = a*previous_velocity + (1-a)*current_velocity;
+  return velocity_final;
 }
 
 

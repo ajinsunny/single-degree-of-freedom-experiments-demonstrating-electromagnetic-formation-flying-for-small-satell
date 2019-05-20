@@ -2,6 +2,7 @@
 
 /*
    Small Satellite Position Control Software.
+   Filename: Closed_Loop_SAT2_main.ino
    Author: Ajin Sunny
    Last Modified by: Ajin Sunny
 
@@ -134,7 +135,7 @@ void loop()
   {
     if(myFile)
     {
-    S.startSinusoid(10,A);
+    S.startSinusoid1(10,A);
     delay(84);
     Serial.print("Voltage value: ");
     Serial.println(S.return_voltage());

@@ -1,5 +1,6 @@
 /*
    Small Satellite Position Control Software.
+   Filename: Closed_Loop_SAT1_main.ino
    Author: Ajin Sunny
    Last Modified by: Ajin Sunny
 
@@ -7,9 +8,7 @@
    Written for Thesis: One dimensional Electromagnetic Actuation and Pulse Sensing.
    Version: 1.0
    Date: 02-25-2019
-   Last Updated: 04-07-2019
-
-
+   Last Updated: 05-17-2019
 
 */
 
@@ -138,8 +137,8 @@ void loop()
   {
     if(myFile)
     {
-    S.startSinusoid(100,A);
-    delay(36);
+    S.startSinusoid1(10,A);
+    delay(84);
     Serial.print("Voltage value: ");
     Serial.println(S.return_voltage());
     dist[i] = (sensor.getDistance()/1000)+0.2;

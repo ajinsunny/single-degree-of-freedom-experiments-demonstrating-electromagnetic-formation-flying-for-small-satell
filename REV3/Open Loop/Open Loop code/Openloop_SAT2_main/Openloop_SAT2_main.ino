@@ -1,3 +1,21 @@
+
+/*
+   Small Satellite Position Control Software.
+   Filename: Open_Loop_SAT2_main.ino
+   Author: Ajin Sunny
+   Last Modified by: Ajin Sunny
+
+
+   Written for Thesis: One dimensional Electromagnetic Actuation and Pulse Sensing.
+   Version: 1.0
+   Date: 02-25-2019
+
+
+*/
+
+
+
+
 #include <DueTimer.h>
 #include <SineWaveDue.h>
 #include <SD.h>
@@ -13,8 +31,10 @@ unsigned long period = 30000;
 double dist[3] = {0.0,0.0,0.0};
 unsigned int i = 1;
 double vel = 0.0;
-double velocity = 0.0; 
-double delta_pos = 0.0;
+double velocity[3] = {0.0,0.0,0.0}; 
+double curr_vel[3] = {0.0,0.0,0.0};
+double prev_vel = 0;
+double a = 0.5;
 File myFile;
 
 void setup()  
@@ -65,22 +85,24 @@ void loop()
   {
     if(myFile)
     {
-    S.startSinusoid1(20);
+    S.startSinusoid1(10);
     delay(87);
 //    //Serial.print("Voltage value: ");
 //    //Serial.println(S.return_voltage());
     dist[i] = (sensor.getDistance()/10)+20;
     //i++;
     vel = velocity_func(dist);
-//    //Serial.print("Distance: ");
+    Serial.print("Distance: ");
     Serial.println(dist[i]);
     myFile.print(dist[i]);
     myFile.print(",");
     i++;
     Serial.print("Velocity: ");
     Serial.println(vel);
-    myFile.println(vel);
-//    myFile.print(",");
+    myFile.print(vel);
+    myFile.print(",");
+   // myFile.print("Time: ");
+    myFile.println(millis());
 //    
     if (i == 3)
     {
@@ -93,6 +115,7 @@ void loop()
     }
   }
     myFile.close();
+    //SD.remove("sat2.csv");
     exit(0);
 }
     
@@ -109,10 +132,19 @@ void loop()
 //  }
     
 
+//double velocity_func(double dist[2])
+//{
+//  delta_pos = dist[i] - dist[i - 1];
+//  velocity = delta_pos/0.016;
+//  return velocity;
+//}
+
+
 double velocity_func(double dist[2])
-{
-  delta_pos = dist[i] - dist[i - 1];
-  velocity = delta_pos/0.016;
+{ 
+  curr_vel = (dist[i] - dist[i - 1])/0.016;
+  prev_vel = curr_vel[i-1];
+  velocity = a*prev_vel[i-1] + (1-a)*curr_vel;
   return velocity;
 }
 
