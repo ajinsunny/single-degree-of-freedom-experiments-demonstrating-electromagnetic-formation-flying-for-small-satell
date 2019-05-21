@@ -83,10 +83,10 @@ void loop()
 {   
   while(millis() < period) 
   {
+    S.startSinusoid1(10);
     if(myFile)
     {
-    S.startSinusoid1(100);
-    delay(87);
+    delay(7);
 //    //Serial.print("Voltage value: ");
 //    //Serial.println(S.return_voltage());
     dist[i] = (sensor.getDistance()/10)+20;
@@ -112,8 +112,8 @@ void loop()
     }
 //    
 //    //delay(1000);
-    S.stopSinusoid();
     }
+    S.stopSinusoid();
   }
     myFile.close();
     //SD.remove("sat1.csv")
