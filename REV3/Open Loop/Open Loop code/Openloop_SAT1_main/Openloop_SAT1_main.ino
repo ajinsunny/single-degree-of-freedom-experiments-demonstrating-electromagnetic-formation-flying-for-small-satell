@@ -25,15 +25,16 @@
 
 char incomingByte;
 DFRobotVL53L0X sensor;
-unsigned long period = 30000; 
-double dist[3]={0.0,0.0,0.0};
+unsigned long period = 15000; 
+double dist[10] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 unsigned int i = 1;
 double V_final = 0.0;
+double velocity_final_final = 0.0;
 double velocity_final = 0.0;
-double vel[3] = {0.0,0.0,0.0};
+double vel[10] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double previous_velocity = 0.0;
 double current_velocity = 0.0;
-double a = 0.5;
+double a = 0.85;
 File myFile;
 
 void setup()  
@@ -67,9 +68,13 @@ void setup()
   //Laser rangefinder begins to work
   sensor.start();
   myFile = SD.open("sat1.csv", FILE_WRITE);
-  myFile.print("Distance");
+  
+  myFile.print("Time");
+  myFile.print(",");
+  myFile.print("Distance"); 
   myFile.print(",");
   myFile.println("Velocity"); 
+   
   while(Serial.available()==0){}
   incomingByte = Serial.read();
   if(incomingByte == 'A')
@@ -80,43 +85,45 @@ void setup()
 } 
 
 void loop()  
-{   
+{  
+  S.startSinusoid1(10); 
   while(millis() < period) 
   {
-    S.startSinusoid1(10);
+    
     if(myFile)
     {
-    delay(7);
+    //delay(7);
 //    //Serial.print("Voltage value: ");
 //    //Serial.println(S.return_voltage());
-    dist[i] = (sensor.getDistance()/10)+20;
+    //dist[i] = (sensor.getDistance()/10)+20;
    // i++;
-    V_final = velocity_func(dist);
-    Serial.print("Distance: ");
-    Serial.println(dist[i]);
-    myFile.print(dist[i]);
-    myFile.print(",");
-    i++;
-    Serial.print("Velocity: ");
-    Serial.println(V_final);
-    myFile.print(V_final);
-    myFile.print(",");
-   // myFile.print("Time: ");
-    myFile.println(millis());
+    velocity_func();
+//    Serial.print("Distance: ");
+//    Serial.println(dist[i]);
+//    myFile.print(dist[i]);
+//    myFile.print(",");
+//    i++;
+//    Serial.print("Velocity: ");
+//    Serial.println(V_final);
+//    myFile.print(V_final);
+//    myFile.print(",");
+//   // myFile.print("Time: ");
+//    myFile.println(millis());
 //
 //    
-    if (i == 3)
-    {
-      dist[0] = dist[i-1];
-      i = 1;
-    }
-//    
+//    if (i == 3)
+//    {
+//      dist[0] = dist[i-1];
+//      i = 1;
+//    }
+////    
 //    //delay(1000);
     }
-    S.stopSinusoid();
+    
   }
     myFile.close();
     //SD.remove("sat1.csv")
+    S.stopSinusoid();
     exit(0);
 } 
 
@@ -129,13 +136,53 @@ void loop()
 //}
 
 
-double velocity_func(double dist[2])
+void velocity_func()
 { 
-  vel[i] = (dist[i] - dist[i - 1])/0.016;
-  current_velocity = vel[i];
-  previous_velocity = vel[i-1];
-  velocity_final = a*previous_velocity + (1-a)*current_velocity;
-  return velocity_final;
+
+  for(int k = 0; k < 10; k++)
+  { 
+    dist[i] = sensordistRead();   // Captures the distance  
+    vel[i] = (dist[i] - dist[i - 1])/0.038;   // Calculates the velocity 
+    current_velocity = vel[i];        // current velocity 
+    previous_velocity = vel[i-1];     // previous velocity
+    velocity_final = a*previous_velocity + (1-a)*current_velocity;    // forward euler formula for the velocity. 
+    i++; 
+     
+    if (i == 10)
+      {
+        dist[0]=dist[i-1];    //shifts the array back to the 0th element of the array. 
+        i = 1;                // sets the counter back to the first position. 
+      }
+      
+    velocity_final_final = velocity_final_final + velocity_final;   //sum the velocity to a double point variable. 
+  }
+
+  //Time
+  Serial.print("Time: ");
+  Serial.println(millis());
+  myFile.print(millis());
+  myFile.print(",");
+  
+  //Distance
+  Serial.print("Distance: ");
+  Serial.println(dist[i]);
+  myFile.print(dist[i]);
+  myFile.print(",");
+  
+  velocity_final_final = velocity_final_final/10;       //Average the velocity. 
+
+  Serial.print("Velocity: ");
+  Serial.println(velocity_final_final);
+  myFile.println(velocity_final_final);
+  
+}
+
+
+double sensordistRead()
+{
+  double relative_dist;
+  relative_dist = (sensor.getDistance()/10);
+  return relative_dist; 
 }
 
 
