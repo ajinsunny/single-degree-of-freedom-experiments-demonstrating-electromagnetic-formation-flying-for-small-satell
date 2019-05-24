@@ -13,7 +13,7 @@
 
 */
 
-
+//HEADER FILES 
 #include <DueTimer.h>
 #include <SineWaveDue.h>
 #include <SD.h>
@@ -23,19 +23,22 @@
 #include "DFRobot_VL53L0X.h"
 
 
+
+DFRobotVL53L0X sensor;  //SENSOR OBJECT
+File myFile;            // FILE OBJECT
+
 char incomingByte;
-DFRobotVL53L0X sensor;
 unsigned long period = 15000; 
-double dist[10] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double dist[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 unsigned int i = 1;
 double V_final = 0.0;
 double velocity_final_final = 0.0;
-double velocity_final = 0.0;
-double vel[10] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; 
+double velocity_final[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double vel[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0}; 
 double previous_velocity = 0.0;
 double current_velocity = 0.0;
-double a = 0.85;
-File myFile;
+double a = 0.9;
+
 
 void setup()  
 { 
@@ -85,7 +88,7 @@ void setup()
 
 void loop()  
 { 
-  S.startSinusoid1(100);
+  S.startSinusoid1(10);
   while(millis() < period) 
   {    
     if(myFile)
@@ -141,27 +144,32 @@ void loop()
 //  return velocity;
 //}
 
+/*------------- VELOCITY FUNCTION---------------*/
 
 void velocity_func()
 { 
   
    
-for(int k = 0; k < 10; k++)
+for(int k = 0; k < 7; k++)
   { 
     dist[i] = sensordistRead();   // Captures the distance  
     vel[i] = (dist[i] - dist[i - 1])/0.038;   // Calculates the velocity 
     current_velocity = vel[i];        // current velocity 
     previous_velocity = vel[i-1];     // previous velocity
-    velocity_final = a*previous_velocity + (1-a)*current_velocity;    // forward euler formula for the velocity. 
+    velocity_final[i] = a*velocity_final[i-1] + (1-a)*current_velocity;    // forward euler formula for the velocity.
+    velocity_final_final = velocity_final_final + velocity_final[i];   //sum the velocity to a double point variable.
+     
     i++; 
      
-    if (i == 10)
+    if (i == 7)
       {
         dist[0]=dist[i-1];    //shifts the array back to the 0th element of the array. 
+        vel[0] = vel[i-1];
+        velocity_final[0] = velocity_final[i-1];
         i = 1;                // sets the counter back to the first position. 
       }
       
-    velocity_final_final = velocity_final_final + velocity_final;   //sum the velocity to a double point variable. 
+     
   }
 
   //Time
@@ -177,7 +185,7 @@ for(int k = 0; k < 10; k++)
   myFile.print(",");
 
   
-  velocity_final_final = velocity_final_final/10;       //Average the velocity. 
+  velocity_final_final = velocity_final_final/7;       //Average the velocity. 
 
   //Velocity
   Serial.print("Velocity: ");
@@ -192,7 +200,7 @@ for(int k = 0; k < 10; k++)
 double sensordistRead()
 {
   double relative_dist;
-  relative_dist = (sensor.getDistance()/10);
+  relative_dist = ((sensor.getDistance()/10)+20);
   return relative_dist; 
 }
 
