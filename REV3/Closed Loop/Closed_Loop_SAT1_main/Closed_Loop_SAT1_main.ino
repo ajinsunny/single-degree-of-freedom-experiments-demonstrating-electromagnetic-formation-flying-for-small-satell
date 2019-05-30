@@ -32,7 +32,7 @@
 DFRobotVL53L0X sensor;   // SENSOR OBJECT
 File myFile;             // FILE OBJECT 
 
-unsigned long period = 7000000000;  // Count down 1 minute
+unsigned long period = 30000;  // Count down 1 minute
 unsigned long startime;
 long previousMillis = 0;
 unsigned long endtime;
@@ -50,18 +50,21 @@ float k1a = 10;
 float kr = 1;
 float kv = 1;
 double vel[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-double velocity_final = 0.0;
+double velocity_final[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 float a1 = 0;
 float a2 = 0;
-float desired_dist = 0.30;
-float A = 0;
+float desired_dist = 0.50;
+double A_v = 0.0;
+double A_d = 0.0;
+double digital_vsine = 0.0;
 double Amplitude = 0.0;
 unsigned int i = 0;
 char incomingByte;
-double averaged_relative_dist = 0.0;
+double relative_dist = 0.0;
 double total_dist = 0.0;
+double total_relative_dist = 0.0;
 double velocity_final_final = 0.0;
-double a = 0.1;
+double a = 0.9;
 double previous_velocity = 0.0;
 double current_velocity = 0.0;
 
@@ -83,7 +86,6 @@ void setup() {
     ; // wait for serial port to connect. Needed for native USB port only
   }
   
-
   Serial.print("Initializing SD card...");
   
     // see if the card is present and can be initialized:
@@ -102,6 +104,17 @@ void setup() {
   //Laser rangefinder begins to work
   sensor.start();
   myFile = SD.open("sat1.csv", FILE_WRITE);
+
+  myFile.println(" ");
+  myFile.print("Time");
+  myFile.print(",");
+  myFile.print("Distance"); 
+  myFile.print(",");
+  myFile.print("Amplitude Voltage");
+  myFile.print(",");
+  myFile.println("Amplitude Digital");
+
+  
   while (Serial.available() == 0) {}
   incomingByte = Serial.read();
     
@@ -111,7 +124,6 @@ void setup() {
   }
 
   //delay(20000);
-
 }
 
 
@@ -134,38 +146,38 @@ void setup() {
 //
 //}
 
-
 /*--------------------LOOP-----------------------*/
 
 void loop()
 {
   while (millis() < period)
   {
-    S.startSinusoid1(10,A);
+    S.startSinusoid1(10,A_d);
     if(myFile)
     {
     
-    //delay(84);
+    delay(8);
 //    Serial.print("Voltage value: ");
 //    Serial.println(S.return_voltage());
 
 /// COMPUTATION FUNCTION
      
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < 7; i++)
     {
-      averaged_relative_dist = sensordistRead();
-      total_dist = total_dist + averaged_relative_dist;  
+      relative_dist = sensordistRead();
+      total_relative_dist = total_relative_dist + relative_dist;  
     }
 
-    total_dist = total_dist/10;
+    total_relative_dist = total_relative_dist/7;
 
-    A = feedback_algorithm(total_dist);
+    A_v = feedback_algorithm(total_relative_dist);
+    A_d = (A_v*490)/2.75; // Converting voltage to digital
+
+ 
     
     //vel = velocity_func();
     
-/// AMPLITUDE UPDATE 
-    
-    
+    /// AMPLITUDE UPDATE   
     
     //Time
     Serial.print("Time: ");
@@ -175,25 +187,36 @@ void loop()
   
     //Distance
     Serial.print("Distance: ");
-    Serial.println(total_dist);
-    myFile.print(total_dist);
+    Serial.println(total_relative_dist);
+    myFile.print(total_relative_dist);
     myFile.print(",");
   
-//    //Velocity
-//    Serial.print("Velocity: ");
-//    Serial.println(velocity_final_final);
-//    myFile.println(velocity_final_final);
+//  //Velocity
+//  Serial.print("Velocity: ");
+//  Serial.println(velocity_final_final);
+//  myFile.println(velocity_final_final);
 
-    //Amplitude
-    Serial.print("Amplitude: ");
-    Serial.println(A);
-    myFile.println(A);
-//    i++;
+    //Voltage Amplitude
+    Serial.print("Amplitude Voltage: ");
+    Serial.println(A_v);
+    myFile.print(A_v);
+    myFile.print(",");
+
+    //Digital Amplitude
+    Serial.print("Digital Amplitude: ");
+    Serial.println(A_d);
+    myFile.println(A_d);
+    
+
+    
+    i++;
+    
 //    if (i >= 2)
 //    {
 //      i = 0;
 //    }
-//    A = feedback_algorithm(dist[i], vel);      
+//    A = feedback_algorithm(dist[i], vel); 
+     
   }
   S.stopSinusoid(); 
   } 
@@ -203,7 +226,6 @@ void loop()
 
 
 /*--------------------SENSOR READ FUNCTION--------*/
-
 //void sensorRead()
 //{
 //
@@ -261,45 +283,58 @@ double velocity_func()
   { 
   dist[i] = sensordistRead();
   vel[i] = (dist[i] - dist[i-1])/0.038;
-  current_velocity = vel[i];
+  current_velocity = vel[i+1];
   previous_velocity = vel[i-1];
-  velocity_final = a*previous_velocity + (1-a)*current_velocity; 
+  velocity_final[i] = a*velocity_final[i] + (1-a)*current_velocity; 
+  velocity_final_final = velocity_final_final + velocity_final[i+1];   //sum the velocity to a double point variable.
   i++; 
   
   if (i == 7)
       {
         dist[0]=dist[i-1];    //shifts the array back to the 0th element of the array. 
+        vel[0] = vel[i-1];    // shifts the velocity array back to the 0th element of the array.
+        velocity_final[1] = velocity_final[i-2];
         i = 1;                // sets the counter back to the first position. 
       }
-    velocity_final_final = velocity_final_final + velocity_final;   //sum the velocity to a double point variable. 
+     
   }
-  velocity_final_final = velocity_final_final/7;       //Average the velocity. 
+  velocity_final_final = velocity_final_final/7; //Average the velocity. 
+  
   return velocity_final_final;
 }
 
-/*-----------------SENSOR READ FUNCTION----------------*/ 
 
+/*-----------------SENSOR READ FUNCTION----------------*/ 
 double sensordistRead()
 {
   double actual_relative_dist;
-  actual_relative_dist = ((sensor.getDistance()/1000)+0.2);
+  actual_relative_dist = ((sensor.getDistance()/1000));
   return actual_relative_dist; 
 }
 
 
-/*----------------FEEDBACK ALGORITHM FUNCTION -----------------*/
 
+
+/*----------------FEEDBACK ALGORITHM FUNCTION -----------------*/
 double feedback_algorithm(double dist)
 {
-  Amplitude = k1a * pow(dist,2) * (tanh(kr * (dist - desired_dist)));
+  Amplitude = k1a * pow(dist,2) * (tanh(kr * (dist - desired_dist)));    
+  return Amplitude;
+  
+//  if (Amplitude >= 500)
+//    {return 490;}
+//  else if (Amplitude<-500)
+//    { return -490;}
+//  else
+//    {return Amplitude;}
 
-  if (Amplitude >= 500)
-    {return 490;}
-  else if (Amplitude<-500)
-    { return -490;}
-  else
-    {return Amplitude;}
 }
+
+
+
+
+
+
 
 
 

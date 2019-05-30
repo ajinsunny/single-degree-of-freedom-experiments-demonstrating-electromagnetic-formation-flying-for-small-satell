@@ -9,6 +9,7 @@
    Written for Thesis: One dimensional Electromagnetic Actuation and Pulse Sensing.
    Version: 1.0
    Date: 02-25-2019
+   Last Updated: 05-24-2019
 
 
 */
@@ -143,18 +144,18 @@ void velocity_func()
   { 
     dist[i] = sensordistRead();   // Captures the distance  
     vel[i] = (dist[i] - dist[i - 1])/0.038;   // Calculates the velocity 
-    current_velocity = vel[i];        // current velocity 
+    current_velocity = vel[i+1];        // current velocity 
     previous_velocity = vel[i-1];     // previous velocity
-    velocity_final[i] = a*velocity_final[i-1] + (1-a)*current_velocity;    // forward euler formula for the velocity. 
-    velocity_final_final = velocity_final_final + velocity_final[i];      //sum the velocity to a double point variable. 
+    velocity_final[i+1] = a*velocity_final[i] + (1-a)*current_velocity;    // forward euler formula for the velocity. 
+    velocity_final_final = velocity_final_final + velocity_final[i+1];      //sum the velocity to a double point variable. 
     
-    i++;
-     
+    i++; 
+
     if (i == 7)
       {
         dist[0]=dist[i-1];    //shifts the array back to the 0th element of the array. 
         vel[0]=vel[i-1];    // shifts the velocity array back to the 0th element of the array. 
-        velocity_final[0] = velocity_final[i-1];
+        velocity_final[1] = velocity_final[i-2];
         i = 1;                // sets the counter back to the first position. 
       }
            
@@ -185,7 +186,7 @@ void velocity_func()
 double sensordistRead()
 {
   double relative_dist;
-  relative_dist = (sensor.getDistance()/10);
+  relative_dist = (sensor.getDistance()/10+20);
   return relative_dist; 
 }
 

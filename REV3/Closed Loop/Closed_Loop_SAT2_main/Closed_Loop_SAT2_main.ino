@@ -33,7 +33,7 @@
 DFRobotVL53L0X sensor;   // sensor object
 File myFile;             // File Object
 
-unsigned long period = 7000000000;  // Count down 30 sec
+unsigned long period = 30000;  // Count down 30 sec
 unsigned long startime;
 long previousMillis = 0;
 unsigned long endtime;
@@ -43,23 +43,31 @@ unsigned long delta_t = 0;
 unsigned long delta_t1 = 0;
 long lastMillis = 0;
 long loops = 0;
-float dist[2];
+float dist[7]= {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 const float c = 10;
 float t1;
 float t2;
 float delta_pos;
 float velocity;
-float k2a = 9000;
+float k2a = 10;
 float kr = 1;
 float kv = 1;
-float vel = 0;
+double vel[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double velocity_final[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 float a1 = 0;
 float a2 = 0;
-float desired_dist = 0.30;
 float Amplitude;
-float A = 0;
+double A_v = 0.0;
+double A_d = 0.0;
 unsigned int i = 0;
 char incomingByte;
+double relative_dist = 0.0;
+double total_relative_dist = 0.0;
+double velocity_final_final = 0.0;
+double a = 0.9;
+double previous_velocity = 0.0;
+double current_velocity = 0.0;
+
 
 
 /*--------------------SETUP-------------------------*/
@@ -98,9 +106,23 @@ void setup() {
   sensor.start();
   //delay(20000);
   myFile = SD.open("sat2.csv", FILE_WRITE);
+
+  myFile.println(" ");
+  myFile.print("Time");
+  myFile.print(",");
+  myFile.print("Distance"); 
+  myFile.print(",");
+  myFile.print("Amplitude Voltage");
+  myFile.print(",");
+  myFile.println("Amplitude Digital");
+  
   while (Serial.available() == 0) {}
-    incomingByte = Serial.read();
+  incomingByte = Serial.read();
+
+    if(incomingByte == 'A')
+    {
     Serial.println(incomingByte);    
+    }
 }
 
 
@@ -129,46 +151,76 @@ void setup() {
 
 void loop()
 {
-  if(incomingByte == 'A') 
-  {
   while (millis() < period)
   {
+    S.startSinusoid1(10,A_d);
     if(myFile)
     {
-    S.startSinusoid1(10,A);
-    delay(84);
-    Serial.print("Voltage value: ");
-    Serial.println(S.return_voltage());
-    dist[i] = (sensor.getDistance()/1000)+0.2;
-    vel = velocity_func(dist);
+   
+      delay(8);
+//    Serial.print("Voltage value: ");
+//    Serial.println(S.return_voltage());
+//    dist[i] = (sensor.getDistance()/1000)+0.2;
+//    vel = velocity_func(dist);
+
+      for(int i=0; i < 7; i++)
+      {
+        relative_dist = sensordistRead();
+        total_relative_dist = total_relative_dist + relative_dist;
+      }
+
+      total_relative_dist = total_relative_dist/7;
+  
+      A_v = feedback_algorithm(total_relative_dist);
+      A_d = (A_v*490)/2.75;
     
+    //Time
+    Serial.print("Time: ");
+    Serial.println(millis());
+    myFile.print(millis());
+    myFile.print(",");
+  
+    //Distance
     Serial.print("Distance: ");
-    Serial.println(dist[i]);
-    myFile.print(dist[i]);
+    Serial.println(total_relative_dist);
+    myFile.print(total_relative_dist);
     myFile.print(",");
-    Serial.print("Velocity: ");
-    Serial.println(vel);
-    myFile.print(vel);
-    myFile.print(",");
+  
+//    //Velocity
+//    Serial.print("Velocity: ");
+//    Serial.println(velocity_final_final);
+//    myFile.println(velocity_final_final);
+
+    //Voltage Amplitude
     Serial.print("Amplitude: ");
-    Serial.println(A);
-    myFile.println(A);
+    Serial.println(A_v);
+    myFile.print(A_v);
+    myFile.print(",");
+    
+    //Digital Amplitude
+    Serial.print("Digital Amplitude: ");
+    Serial.println(A_d);
+    myFile.println(A_d);
+
+
+
+    
     i++;
-    if (i >= 2)
-    {
-      i = 0;
-    }
-    A = feedback_algorithm(dist[i], vel);
-    S.stopSinusoid();
+
+    
+//    if (i >= 2)
+//    {
+//      i = 0;
+//    }
+//    A = feedback_algorithm(dist[i], vel);
+//    S.stopSinusoid();
 
   }
-  }
+  S.stopSinusoid();
   }
   myFile.close();
   exit(0);
-
 }
-
 
 /*--------------------SENSOR READ FUNCTION--------*/
 
@@ -221,41 +273,102 @@ void loop()
 //
 //}
 
+
+
 /*-------------VELOCITY FUNCTION---------------*/
 
-float velocity_func(float dist[2])
+double velocity_func()
 {
-  delta_pos = dist[i] - dist[i - 1];
-  velocity = delta_pos/0.016;
-  return velocity;
+//  delta_pos = dist[i] - dist[i - 1];
+//  velocity = delta_pos/0.016;
+//  return velocity;
+
+  for(int k = 0; k<7;k++)
+  {
+  dist[i] = sensordistRead();
+  vel[i] = (dist[i] - dist[i-1])/0.038; 
+  current_velocity = vel[i+1];
+  previous_velocity = vel[i-1]; 
+  velocity_final[i] = a*velocity_final[i] + (1-a)*current_velocity; 
+
+  velocity_final_final = velocity_final_final + velocity_final[i+1];
+  i++;
+  
+  if(i==7)
+    {
+      dist[0] = dist[i-1]; //shift the array back to the 0th element of the array.
+      vel[0] = vel[i-1];   // shifts the velocity array back to the 0th element of the array. 
+      velocity_final[1] = velocity_final[i-2];
+      i = 1;               // sets the counter back to the first position. 
+    }
+  }
+
+
+  velocity_final_final = velocity_final_final/7;  //Average velocity.
+
+  return velocity_final_final;
+  
 }
+
+
+/*-------------SENSOR READ FUNCTION-----------*/ 
+
+double sensordistRead()
+{
+  
+  double actual_relative_dist;
+  actual_relative_dist = ((sensor.getDistance()/1000)+0.2);
+  return actual_relative_dist;
+  
+}
+
+
 
 
 /*----------------FEEDBACK ALGORITHM FUNCTION -----------------*/
-
-float feedback_algorithm(float dist, float velocity)
+double feedback_algorithm(double dist)
 {
-  Amplitude = k2a*pow(dist,2);
-//  Amplitude = k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5)) * sign((pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5)));
-  if (Amplitude >=500)
-    {return 490;}
-    else{
-      return Amplitude;
-    }
-
   
+  Amplitude = k2a*pow(dist,2); 
+  return Amplitude; 
 
-//  if ((tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel))>0)
-//  {
-//    Amplitude = k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5));
-//  }
-//  else
-//  {
-//    Amplitude = -k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5));
-//  }
-//  return Amplitude;
-//  if (Amplitude > 500)
-//   {return 500;}
-//  else
-//   {return Amplitude;}
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+//float feedback_algorithm(float dist, float velocity)
+//{
+//  Amplitude = k2a*pow(dist,2);
+////  Amplitude = k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5)) * sign((pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5)));
+//  if (Amplitude >=500)
+//    {return 490;}
+//    else{
+//      return Amplitude;
+//    }
+//
+//  
+//
+////  if ((tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel))>0)
+////  {
+////    Amplitude = k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5));
+////  }
+////  else
+////  {
+////    Amplitude = -k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5));
+////  }
+////  return Amplitude;
+////  if (Amplitude > 500)
+////   {return 500;}
+////  else
+////   {return Amplitude;}
+//}
