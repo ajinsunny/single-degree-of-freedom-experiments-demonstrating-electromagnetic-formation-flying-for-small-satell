@@ -32,7 +32,7 @@
 DFRobotVL53L0X sensor;   // SENSOR OBJECT
 File myFile;             // FILE OBJECT 
 
-unsigned long period = 30000;  // Count down 1 minute
+unsigned long period = 60000;  // Count down 1 minute
 unsigned long startime;
 long previousMillis = 0;
 unsigned long endtime;
@@ -46,14 +46,15 @@ double dist[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 const float c = 10;
 float t1;
 float t2;
-float k1a = 10;
+float k1a = 60;
 float kr = 1;
 float kv = 1;
 double vel[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double velocity_final[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double V_final;
 float a1 = 0;
 float a2 = 0;
-float desired_dist = 0.50;
+float desired_dist = 0.30;
 double A_v = 0.0;
 double A_d = 0.0;
 double digital_vsine = 0.0;
@@ -156,7 +157,7 @@ void loop()
     if(myFile)
     {
     
-    delay(8);
+    delay(18);
 //    Serial.print("Voltage value: ");
 //    Serial.println(S.return_voltage());
 
@@ -170,12 +171,14 @@ void loop()
 
     total_relative_dist = total_relative_dist/7;
 
-    A_v = feedback_algorithm(total_relative_dist);
+    V_final = velocity_func();
+
+    A_v = feedback_algorithm(total_relative_dist,V_final);
     A_d = (A_v*490)/2.75; // Converting voltage to digital
 
  
     
-    //vel = velocity_func();
+    
     
     /// AMPLITUDE UPDATE   
     
@@ -191,10 +194,10 @@ void loop()
     myFile.print(total_relative_dist);
     myFile.print(",");
   
-//  //Velocity
-//  Serial.print("Velocity: ");
-//  Serial.println(velocity_final_final);
-//  myFile.println(velocity_final_final);
+   //Velocity
+    Serial.print("Velocity: ");
+    Serial.println(V_final);
+//    myFile.println(velocity_final_final);
 
     //Voltage Amplitude
     Serial.print("Amplitude Voltage: ");
@@ -308,7 +311,7 @@ double velocity_func()
 double sensordistRead()
 {
   double actual_relative_dist;
-  actual_relative_dist = ((sensor.getDistance()/1000));
+  actual_relative_dist = ((sensor.getDistance()/1000)+0.2);
   return actual_relative_dist; 
 }
 
@@ -316,11 +319,22 @@ double sensordistRead()
 
 
 /*----------------FEEDBACK ALGORITHM FUNCTION -----------------*/
-double feedback_algorithm(double dist)
+double feedback_algorithm(double dist, double V_final)
 {
-  Amplitude = k1a * pow(dist,2) * (tanh(kr * (dist - desired_dist)));    
-  return Amplitude;
-  
+  Amplitude = k1a * pow(dist,2) * (tanh(kr * (dist - desired_dist)) + c * tanh(kv * V_final));
+
+  if(Amplitude > 2.8)
+  {
+  return 2.8;
+  }
+  else if(Amplitude < -2.8)
+  {
+    return -2.8;
+  }
+
+  else{
+    return Amplitude;
+  }
 //  if (Amplitude >= 500)
 //    {return 490;}
 //  else if (Amplitude<-500)

@@ -329,7 +329,9 @@ double sensordistRead()
 double feedback_algorithm(double dist)
 {
   
-  Amplitude = k2a*pow(dist,2); 
+  //Amplitude = k2a*pow(dist,2);
+  
+  Amplitude = k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5)) * sign((pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5))); 
   return Amplitude;
   
   

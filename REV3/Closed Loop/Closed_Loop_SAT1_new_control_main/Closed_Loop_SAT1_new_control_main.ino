@@ -1,8 +1,6 @@
-
-
 /*
    Small Satellite Position Control Software.
-   Filename: Closed_Loop_SAT2_main.ino
+   Filename: Closed_Loop_SAT1_main.ino
    Author: Ajin Sunny
    Last Modified by: Ajin Sunny
 
@@ -10,7 +8,7 @@
    Written for Thesis: One dimensional Electromagnetic Actuation and Pulse Sensing.
    Version: 1.0
    Date: 02-25-2019
-
+   Last Updated: 05-17-2019
 
 */
 
@@ -18,22 +16,23 @@
   TOF SENSOR MEASUREMENT MODES: CONTINUOUS MODE OR SINGLE MODE
 */
 
+
 //HEADER FILES
+#include <DueTimer.h>
+#include <SineWaveDue.h>
+#include <SD.h>
+#include <SPI.h>
 #include <VL53L0X.h>
 #include "Arduino.h"
 #include "DFRobot_VL53L0X.h"
-#include <SD.h>
-#include <SPI.h>
-#include <DueTimer.h>
-#include <SineWaveDue.h>
 #include <math.h>
 
 
 
-DFRobotVL53L0X sensor;   // sensor object
-File myFile;             // File Object
+DFRobotVL53L0X sensor;   // SENSOR OBJECT
+File myFile;             // FILE OBJECT 
 
-unsigned long period = 60000;  // Count down 30 sec
+unsigned long period = 60000;  // Count down 1 minute
 unsigned long startime;
 long previousMillis = 0;
 unsigned long endtime;
@@ -43,24 +42,27 @@ unsigned long endtime;
 //unsigned long delta_t1 = 0;
 long lastMillis = 0;
 long loops = 0;
-float dist[7]= {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double dist[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 const float c = 10;
 float t1;
 float t2;
-float delta_pos;
-float velocity;
-double k2a = 10;
+float k1a = 60;
+float kr = 1;
+float kv = 1;
 double vel[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double velocity_final[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double V_final;
 float a1 = 0;
 float a2 = 0;
-double Amplitude = 0.0;
+float desired_dist = 0.30;
 double A_v = 0.0;
 double A_d = 0.0;
+double digital_vsine = 0.0;
+double Amplitude = 0.0;
 unsigned int i = 0;
 char incomingByte;
 double relative_dist = 0.0;
+double total_dist = 0.0;
 double total_relative_dist = 0.0;
 double velocity_final_final = 0.0;
 double a = 0.9;
@@ -84,8 +86,9 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
-       
-    Serial.print("Initializing SD card..."); 
+  
+  Serial.print("Initializing SD card...");
+  
     // see if the card is present and can be initialized:
     if (!SD.begin(4)) {
       Serial.println("Card failed, or not present");
@@ -93,7 +96,7 @@ void setup() {
       while (1);
     }
     Serial.println("card initialized.");
-    
+
   Wire.begin();
   //Set I2C sub-device address
   sensor.begin(0x50);
@@ -101,8 +104,7 @@ void setup() {
   sensor.setMode(Continuous, High);
   //Laser rangefinder begins to work
   sensor.start();
-  //delay(20000);
-  myFile = SD.open("sat2.csv", FILE_WRITE);
+  myFile = SD.open("sat1.csv", FILE_WRITE);
 
   myFile.println(" ");
   myFile.print("Time");
@@ -112,16 +114,18 @@ void setup() {
   myFile.print("Amplitude Voltage");
   myFile.print(",");
   myFile.println("Amplitude Digital");
+
   
   while (Serial.available() == 0) {}
   incomingByte = Serial.read();
+    
+  if(incomingByte == 'A')
+  {
+  Serial.println(incomingByte);
+  }
 
-    if(incomingByte == 'A')
-    {
-    Serial.println(incomingByte);    
-    }
+  //delay(20000);
 }
-
 
 
 //struct FB_struct{
@@ -143,7 +147,6 @@ void setup() {
 //
 //}
 
-
 /*--------------------LOOP-----------------------*/
 
 void loop()
@@ -153,27 +156,31 @@ void loop()
     S.startSinusoid1(10,A_d);
     if(myFile)
     {
-   
-      delay(18);
+    
+    delay(18);
 //    Serial.print("Voltage value: ");
 //    Serial.println(S.return_voltage());
-//    dist[i] = (sensor.getDistance()/1000)+0.2;
-//    vel = velocity_func(dist);
 
-      for(int i=0; i < 7; i++)
-      {
-        relative_dist = sensordistRead();
-        total_relative_dist = total_relative_dist + relative_dist;
-      }
+/// COMPUTATION FUNCTION
+     
+    for(int i = 0; i < 7; i++)
+    {
+      relative_dist = sensordistRead();
+      total_relative_dist = total_relative_dist + relative_dist;  
+    }
 
-      total_relative_dist = total_relative_dist/7;
+    total_relative_dist = total_relative_dist/7;
 
-      //V_final = velocity_func();
-      
-      A_v = feedback_algorithm(total_relative_dist);
-      A_d = (A_v*490)/2.75;
+    V_final = velocity_func();
 
-        
+    A_v = feedback_algorithm(total_relative_dist,V_final);
+    A_d = (A_v*490)/2.75; // Converting voltage to digital
+
+ 
+    
+    
+    
+    /// AMPLITUDE UPDATE   
     
     //Time
     Serial.print("Time: ");
@@ -187,44 +194,41 @@ void loop()
     myFile.print(total_relative_dist);
     myFile.print(",");
   
-//    //Velocity
-//    Serial.print("Velocity: ");
-//    Serial.println(velocity_final_final);
+   //Velocity
+    Serial.print("Velocity: ");
+    Serial.println(V_final);
 //    myFile.println(velocity_final_final);
 
     //Voltage Amplitude
-    Serial.print("Amplitude: ");
+    Serial.print("Amplitude Voltage: ");
     Serial.println(A_v);
     myFile.print(A_v);
     myFile.print(",");
-    
+
     //Digital Amplitude
     Serial.print("Digital Amplitude: ");
     Serial.println(A_d);
     myFile.println(A_d);
-
-
+    
 
     
     i++;
-
     
 //    if (i >= 2)
 //    {
 //      i = 0;
 //    }
-//    A = feedback_algorithm(dist[i], vel);
-//    S.stopSinusoid();
-
+//    A = feedback_algorithm(dist[i], vel); 
+     
   }
-  S.stopSinusoid();
-  }
+  S.stopSinusoid(); 
+  } 
   myFile.close();
   exit(0);
 }
 
-/*--------------------SENSOR READ FUNCTION--------*/
 
+/*--------------------SENSOR READ FUNCTION--------*/
 //void sensorRead()
 //{
 //
@@ -268,84 +272,82 @@ void loop()
 //  S.stopSinusoid();
 //
 //  //myFile.close();
-//  Serial.println("-------------------------DONE----------------------------");
+//  Serial.println("-------------------------DONE----------------------M------");
 //  Serial.println("Total Time Lapsed: " + (String)period + "ms has lapsed");
 //
 //
 //}
 
-
-
-/*-------------VELOCITY FUNCTION---------------*/
+/*------------- VELOCITY FUNCTION---------------*/
 
 double velocity_func()
 {
-//  delta_pos = dist[i] - dist[i - 1];
-//  velocity = delta_pos/0.016;
-//  return velocity;
-
-  for(int k = 0; k<7;k++)
-  {
+  for(int k = 0; k < 7; k++)
+  { 
   dist[i] = sensordistRead();
-  vel[i] = (dist[i] - dist[i-1])/0.038; 
+  vel[i] = (dist[i] - dist[i-1])/0.038;
   current_velocity = vel[i+1];
-  previous_velocity = vel[i-1]; 
+  previous_velocity = vel[i-1];
   velocity_final[i] = a*velocity_final[i] + (1-a)*current_velocity; 
-
-  velocity_final_final = velocity_final_final + velocity_final[i+1];
-  i++;
+  velocity_final_final = velocity_final_final + velocity_final[i+1];   //sum the velocity to a double point variable.
+  i++; 
   
-  if(i==7)
-    {
-      dist[0] = dist[i-1]; //shift the array back to the 0th element of the array.
-      vel[0] = vel[i-1];   // shifts the velocity array back to the 0th element of the array. 
-      velocity_final[1] = velocity_final[i-2];
-      i = 1;               // sets the counter back to the first position. 
-    }
+  if (i == 7)
+      {
+        dist[0]=dist[i-1];    //shifts the array back to the 0th element of the array. 
+        vel[0] = vel[i-1];    // shifts the velocity array back to the 0th element of the array.
+        velocity_final[1] = velocity_final[i-2];
+        i = 1;                // sets the counter back to the first position. 
+      }
+     
   }
-
-
-  velocity_final_final = velocity_final_final/7;  //Average velocity.
-
-  return velocity_final_final;
+  velocity_final_final = velocity_final_final/7; //Average the velocity. 
   
+  return velocity_final_final;
 }
 
 
-/*-------------SENSOR READ FUNCTION-----------*/ 
+/*-----------------SENSOR READ FUNCTION----------------*/ 
 double sensordistRead()
 {
-  
   double actual_relative_dist;
   actual_relative_dist = ((sensor.getDistance()/1000)+0.2);
-  return actual_relative_dist;
-  
+  return actual_relative_dist; 
 }
 
 
 
 
 /*----------------FEEDBACK ALGORITHM FUNCTION -----------------*/
-double feedback_algorithm(double dist)
+double feedback_algorithm(double dist, double V_final)
 {
   
-  Amplitude = k2a*pow(dist,2); 
-  return Amplitude;
-  
-  
-//  if (Amplitude > 2.8)
-//  {
-//  return 2.8; 
-//  }
+  //Current control 
+  //Amplitude = k1a * pow(dist,2) * (tanh(kr * (dist - desired_dist)) + c * tanh(kv * V_final));
+
+  //New conrtol
+  Amplitude = k1a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * V_final)),0.5));
+
+  if(Amplitude > 2.8)
+  {
+  return 2.8;
+  }
+  else if(Amplitude < -2.8)
+  {
+    return -2.8;
+  }
+
+  else{
+    return Amplitude;
+  }
+//  if (Amplitude >= 500)
+//    {return 490;}
+//  else if (Amplitude<-500)
+//    { return -490;}
 //  else
-//  {
-//    return Amplitude;
-//  }
+//    {return Amplitude;}
 
 }
-
-
-
 
 
 
@@ -357,27 +359,23 @@ double feedback_algorithm(double dist)
 
 //float feedback_algorithm(float dist, float velocity)
 //{
-//  Amplitude = k2a*pow(dist,2);
-////  Amplitude = k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5)) * sign((pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5)));
-//  if (Amplitude >=500)
+//  Amplitude = k1a * pow(dist,2) * (tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel));
+//
+//  if (Amplitude >= 500)
 //    {return 490;}
-//    else{
-//      return Amplitude;
-//    }
-//
-//  
-//
-////  if ((tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel))>0)
-////  {
-////    Amplitude = k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5));
-////  }
-////  else
-////  {
-////    Amplitude = -k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5));
-////  }
-////  return Amplitude;
-////  if (Amplitude > 500)
-////   {return 500;}
-////  else
-////   {return Amplitude;}
+//  else if (Amplitude<-500)
+//    { return -490;}
+//  else
+//    {return Amplitude;}
 //}
+  
+//  Amplitude = k1a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5));
+//  return Amplitude; 
+//  if (Amplitude<-500)
+//    {return -500;}
+//  if (Amplitude > 500)
+//    {return 500;}
+//  else 
+//  {
+//    return Amplitude;
+//  }
