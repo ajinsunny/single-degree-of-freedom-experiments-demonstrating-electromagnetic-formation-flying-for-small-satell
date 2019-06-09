@@ -10,10 +10,7 @@
    Version: 1.0
    Date: 02-25-2019
    Last Updated: 05-24-2019
-
-
 */
-
 
 #include <DueTimer.h>
 #include <SineWaveDue.h>
@@ -23,10 +20,10 @@
 #include "Arduino.h"
 #include "DFRobot_VL53L0X.h"
 
-
 char incomingByte;
 DFRobotVL53L0X sensor;
-unsigned long period = 15000; 
+
+unsigned long period = 30000; 
 double dist[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 unsigned int i = 1;
 double V_final = 0.0;
@@ -58,8 +55,8 @@ void setup()
       Serial.println("Card failed, or not present");
       // don't do anything more:
       while (1);
-    }
-    Serial.println("card initialized.");
+  }
+  Serial.println("card initialized.");
 
   Wire.begin();
   //Set I2C sub-device address
@@ -70,11 +67,12 @@ void setup()
   sensor.start();
   myFile = SD.open("sat1.csv", FILE_WRITE);
   
+  myFile.println(" ");
   myFile.print("Time");
   myFile.print(",");
-  myFile.print("Distance"); 
-  myFile.print(",");
-  myFile.println("Velocity"); 
+  myFile.println("Distance"); 
+//myFile.print(",");
+//myFile.println("Velocity"); 
    
   while(Serial.available()==0){}
   incomingByte = Serial.read();
@@ -82,7 +80,6 @@ void setup()
   {
   Serial.println(incomingByte);
   }
-
 } 
 
 void loop()  
@@ -139,7 +136,7 @@ void loop()
 
 void velocity_func()
 { 
-
+  
   for(int k = 0; k < 7; k++)
   { 
     dist[i] = sensordistRead();   // Captures the distance  
@@ -151,16 +148,6 @@ void velocity_func()
     
     i++; 
 
-    if (i == 7)
-      {
-        dist[0]=dist[i-1];    //shifts the array back to the 0th element of the array. 
-        vel[0]=vel[i-1];    // shifts the velocity array back to the 0th element of the array. 
-        velocity_final[1] = velocity_final[i-2];
-        i = 1;                // sets the counter back to the first position. 
-      }
-           
-  }
-
   //Time
   Serial.print("Time: ");
   Serial.println(millis());
@@ -170,15 +157,35 @@ void velocity_func()
   //Distance
   Serial.print("Distance: ");
   Serial.println(dist[i]);
-  myFile.print(dist[i]);
-  myFile.print(",");
+  myFile.println(dist[i]);
+//  myFile.print(",");
 
+    if (i == 7)
+      {
+        dist[0]=dist[i-1];    //shifts the array back to the 0th element of the array. 
+        vel[0]=vel[i-1];    // shifts the velocity array back to the 0th element of the array. 
+        velocity_final[1] = velocity_final[i-2];
+        i = 1;                // sets the counter back to the first position. 
+      }        
+  }
+
+//  //Time
+//  Serial.print("Time: ");
+//  Serial.println(millis());
+//  myFile.print(millis());
+//  myFile.print(",");
+//  
+//  //Distance
+//  Serial.print("Distance: ");
+//  Serial.println(dist[i]);
+//  myFile.print(dist[i]);
+//  myFile.print(",");
   
   velocity_final_final = velocity_final_final/7;       //Average the velocity. 
 
-  Serial.print("Velocity: ");
-  Serial.println(velocity_final_final);
-  myFile.println(velocity_final_final);
+//  Serial.print("Velocity: ");
+//  Serial.println(velocity_final_final);
+//  myFile.println(velocity_final_final);
   
 }
 
@@ -186,9 +193,6 @@ void velocity_func()
 double sensordistRead()
 {
   double relative_dist;
-  relative_dist = (sensor.getDistance()/10+20);
+  relative_dist = ((sensor.getDistance()/10)+20);
   return relative_dist; 
-}
-
-
-  
+}  
