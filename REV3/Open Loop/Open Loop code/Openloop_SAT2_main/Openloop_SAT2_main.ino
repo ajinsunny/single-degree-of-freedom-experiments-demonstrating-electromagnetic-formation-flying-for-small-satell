@@ -195,11 +195,9 @@ void velocity_func()
      
 }
 
-
-
 double sensordistRead()
 {
   double relative_dist;
   relative_dist = ((sensor.getDistance()/10)+20);
   return relative_dist; 
-}  
+} 

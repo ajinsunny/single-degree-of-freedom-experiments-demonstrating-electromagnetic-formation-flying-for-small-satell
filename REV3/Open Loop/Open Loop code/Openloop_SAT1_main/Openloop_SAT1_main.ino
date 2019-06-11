@@ -11,6 +11,7 @@
    Date: 02-25-2019
    Last Updated: 05-24-2019
 */
+//HEADER FILES
 
 #include <DueTimer.h>
 #include <SineWaveDue.h>
@@ -24,7 +25,7 @@ char incomingByte;
 DFRobotVL53L0X sensor;
 
 unsigned long period = 30000; 
-double dist[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 unsigned int i = 1;
 double V_final = 0.0;
 double velocity_final_final = 0.0;
@@ -137,7 +138,7 @@ void loop()
 void velocity_func()
 { 
   
-  for(int k = 0; k < 7; k++)
+  for(int k = 0; k < 8; k++)
   { 
     dist[i] = sensordistRead();   // Captures the distance  
     vel[i] = (dist[i] - dist[i - 1])/0.038;   // Calculates the velocity 
@@ -146,7 +147,7 @@ void velocity_func()
     velocity_final[i+1] = a*velocity_final[i] + (1-a)*current_velocity;    // forward euler formula for the velocity. 
     velocity_final_final = velocity_final_final + velocity_final[i+1];      //sum the velocity to a double point variable. 
     
-    i++; 
+    
 
   //Time
   Serial.print("Time: ");
@@ -157,6 +158,8 @@ void velocity_func()
   //Distance
   Serial.print("Distance: ");
   Serial.println(dist[i]);
+  Serial.print("I : ");
+  Serial.println(i);
   myFile.println(dist[i]);
 //  myFile.print(",");
 
@@ -164,10 +167,13 @@ void velocity_func()
       {
         dist[0]=dist[i-1];    //shifts the array back to the 0th element of the array. 
         vel[0]=vel[i-1];    // shifts the velocity array back to the 0th element of the array. 
-        velocity_final[1] = velocity_final[i-2];
-        i = 1;                // sets the counter back to the first position. 
-      }        
+        velocity_final[1] = velocity_final[i-2]; // forward euler velocity
+        Serial.print("Action: ");
+        i = 0;                // sets the counter back to the first position. 
+      }
+      i++;         
   }
+
 
 //  //Time
 //  Serial.print("Time: ");
@@ -188,7 +194,6 @@ void velocity_func()
 //  myFile.println(velocity_final_final);
   
 }
-
 
 double sensordistRead()
 {
