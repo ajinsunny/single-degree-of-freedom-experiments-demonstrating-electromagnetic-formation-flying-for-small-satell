@@ -32,7 +32,7 @@
 DFRobotVL53L0X sensor;   // SENSOR OBJECT
 File myFile;             // FILE OBJECT 
 
-unsigned long period = 60000;  // Count down 1 minute
+unsigned long period = 900000;  // Count down 15 minute
 unsigned long startime;
 long previousMillis = 0;
 unsigned long endtime;
@@ -42,15 +42,15 @@ unsigned long endtime;
 //unsigned long delta_t1 = 0;
 long lastMillis = 0;
 long loops = 0;
-double dist[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-const float c = 10;
+double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+const float c = 100;
 float t1;
 float t2;
-float k1a = 60;
+float k1a = 10;
 float kr = 1;
 float kv = 1;
-double vel[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-double velocity_final[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double vel[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double velocity_final[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double V_final;
 float a1 = 0;
 float a2 = 0;
@@ -212,7 +212,7 @@ void loop()
     
 
     
-    i++;
+   // i++;
     
 //    if (i >= 2)
 //    {
@@ -282,23 +282,28 @@ void loop()
 
 double velocity_func()
 {
-  for(int k = 0; k < 7; k++)
+  for(int k = 0; k < 8; k++)
   { 
   dist[i] = sensordistRead();
+  if(dist[i] > 220.00)
+    {
+      dist[i] = dist[i-1]; 
+    }
   vel[i] = (dist[i] - dist[i-1])/0.038;
   current_velocity = vel[i+1];
   previous_velocity = vel[i-1];
-  velocity_final[i] = a*velocity_final[i] + (1-a)*current_velocity; 
+  velocity_final[i+1] = a*velocity_final[i-1] + (1-a)*current_velocity; 
   velocity_final_final = velocity_final_final + velocity_final[i+1];   //sum the velocity to a double point variable.
-  i++; 
+ 
   
   if (i == 7)
       {
         dist[0]=dist[i-1];    //shifts the array back to the 0th element of the array. 
         vel[0] = vel[i-1];    // shifts the velocity array back to the 0th element of the array.
-        velocity_final[1] = velocity_final[i-2];
-        i = 1;                // sets the counter back to the first position. 
+        velocity_final[0] = velocity_final[i-1];
+        i = 0;                // sets the counter back to the first position. 
       }
+      i++;
      
   }
   velocity_final_final = velocity_final_final/7; //Average the velocity. 
@@ -328,13 +333,13 @@ double feedback_algorithm(double dist, double V_final)
   //New conrtol
   Amplitude = k1a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * V_final)),0.5));
 
-  if(Amplitude > 2.8)
+  if(Amplitude > 2.5)
   {
-  return 2.8;
+  return 2.5;
   }
-  else if(Amplitude < -2.8)
+  else if(Amplitude < -2.5)
   {
-    return -2.8;
+    return -2.5;
   }
 
   else{

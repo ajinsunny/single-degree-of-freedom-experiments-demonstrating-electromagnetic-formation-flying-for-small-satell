@@ -26,14 +26,14 @@
 #include <SPI.h>
 #include <DueTimer.h>
 #include <SineWaveDue.h>
-#include <math.h>
+#include "math.h"
 
 
 
 DFRobotVL53L0X sensor;   // sensor object
 File myFile;             // File Object
 
-unsigned long period = 60000;  // Count down 30 sec
+unsigned long period = 900000;  // Count down 15 min
 unsigned long startime;
 long previousMillis = 0;
 unsigned long endtime;
@@ -43,18 +43,21 @@ unsigned long endtime;
 //unsigned long delta_t1 = 0;
 long lastMillis = 0;
 long loops = 0;
-float dist[7]= {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-const float c = 10;
+float dist[8]= {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+const float c = 100;
 float t1;
 float t2;
 float delta_pos;
 float velocity;
 double k2a = 10;
-double vel[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-double velocity_final[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+float kr = 1;
+float kv = 1;
+double vel[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double velocity_final[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double V_final;
 float a1 = 0;
 float a2 = 0;
+float desired_dist = 0.30;
 double Amplitude = 0.0;
 double A_v = 0.0;
 double A_d = 0.0;
@@ -168,10 +171,10 @@ void loop()
 
       total_relative_dist = total_relative_dist/7;
 
-      //V_final = velocity_func();
+      V_final = velocity_func();
       
-      A_v = feedback_algorithm(total_relative_dist);
-      A_d = (A_v*490)/2.75;
+      A_v = feedback_algorithm(total_relative_dist,V_final);
+      A_d = (A_v*490)/2.75;  // Converting voltage to digital
 
         
     
@@ -206,7 +209,7 @@ void loop()
 
 
     
-    i++;
+    //i++;
 
     
 //    if (i >= 2)
@@ -284,24 +287,29 @@ double velocity_func()
 //  velocity = delta_pos/0.016;
 //  return velocity;
 
-  for(int k = 0; k<7;k++)
+  for(int k = 0; k<8;k++)
   {
   dist[i] = sensordistRead();
+  if(dist[i] > 220.00)
+    {
+      dist[i] = dist[i-1]; 
+    }
   vel[i] = (dist[i] - dist[i-1])/0.038; 
   current_velocity = vel[i+1];
   previous_velocity = vel[i-1]; 
-  velocity_final[i] = a*velocity_final[i] + (1-a)*current_velocity; 
+  velocity_final[i+1] = a*velocity_final[i-1] + (1-a)*current_velocity; 
 
   velocity_final_final = velocity_final_final + velocity_final[i+1];
-  i++;
+ 
   
   if(i==7)
     {
       dist[0] = dist[i-1]; //shift the array back to the 0th element of the array.
       vel[0] = vel[i-1];   // shifts the velocity array back to the 0th element of the array. 
-      velocity_final[1] = velocity_final[i-2];
-      i = 1;               // sets the counter back to the first position. 
+      velocity_final[0] = velocity_final[i-1];
+      i = 0;               // sets the counter back to the first position. 
     }
+     i++;
   }
 
 
@@ -326,13 +334,33 @@ double sensordistRead()
 
 
 /*----------------FEEDBACK ALGORITHM FUNCTION -----------------*/
-double feedback_algorithm(double dist)
+double feedback_algorithm(double dist, double V_final)
 {
   
   //Amplitude = k2a*pow(dist,2);
+
+  if((tanh(kr * (dist - desired_dist)) + c*tanh(kv * V_final)) > 0)
+  {
+    Amplitude = k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * V_final)),0.5));
+  }
+  else{
+
+    Amplitude = -k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * V_final)),0.5));
+  }
+
+  if(Amplitude > 2.5)
+    {
+    return 2.5;
+    }
+    else if(Amplitude < -2.5)
+    {
+      return -2.5;
+    }
   
-  Amplitude = k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5)) * sign((pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * vel)),0.5))); 
-  return Amplitude;
+    else{
+      return Amplitude;
+    }
+
   
   
 //  if (Amplitude > 2.8)

@@ -11,6 +11,7 @@
    Date: 02-25-2019
    Last Updated: 05-24-2019
 */
+
 //HEADER FILES 
 
 #include <DueTimer.h>
@@ -21,17 +22,18 @@
 #include "Arduino.h"
 #include "DFRobot_VL53L0X.h"
 
+char incomingByte;
 DFRobotVL53L0X sensor;  //SENSOR OBJECT
 File myFile;            // FILE OBJECT
 
-char incomingByte;
+
 unsigned long period = 30000; 
-double dist[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-unsigned int i = 1;
+double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+unsigned int i = 0;
 double V_final = 0.0;
 double velocity_final_final = 0.0;
-double velocity_final[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-double vel[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0}; 
+double velocity_final[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double vel[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0}; 
 double previous_velocity = 0.0;
 double current_velocity = 0.0;
 double a = 0.9;
@@ -68,6 +70,7 @@ void setup()
   //Laser rangefinder begins to work
   sensor.start();
   myFile = SD.open("sat2.csv", FILE_WRITE);
+  
   myFile.println(" ");
   myFile.print("Time");
   myFile.print(",");
@@ -98,7 +101,22 @@ void loop()
 //    double disp = sensor.getDistance()/10;
 //    Serial.println(disp);
     //i++;   
-    velocity_func(); 
+     V_final = velocity_func();
+     
+     Serial.print("Time: ");
+     Serial.println(millis());
+     myFile.print(millis());
+     myFile.print(",");
+
+     Serial.print("Distance: ");
+     Serial.println(dist[i]);
+     myFile.print(dist[i]);
+     myFile.print(",");
+
+     Serial.print("Velocity: ");
+     Serial.println(V_final);
+     myFile.println(V_final);
+     
 //    Serial.print("Velocity: ");
 //    Serial.println(V_final);
 //    myFile.print(V_final);
@@ -140,18 +158,22 @@ void loop()
 
 /*------------- VELOCITY FUNCTION---------------*/
 
-void velocity_func()
+double velocity_func()
 { 
    
-  for(int k = 0; k < 7; k++)
+  for(int k = 0; k < 8; k++)
   { 
-    dist[i] = sensordistRead();   // Captures the distance  
+    dist[i] = sensordistRead();   // Captures the distance 
+    if(dist[i] > 220.00)
+    {
+      dist[i] = dist[i-1]; 
+    } 
     vel[i] = (dist[i] - dist[i - 1])/0.038;   // Calculates the velocity 
     current_velocity = vel[i+1];        // current velocity 
     previous_velocity = vel[i-1];     // previous velocity
     velocity_final[i+1] = a*velocity_final[i] + (1-a)*current_velocity;    // forward euler formula for the velocity.
     velocity_final_final = velocity_final_final + velocity_final[i+1];   //sum the velocity to a double point variable. 
-    i++;
+    
     
 //    //Time
 //    Serial.print("Time: ");
@@ -169,35 +191,39 @@ void velocity_func()
       {
         dist[0]=dist[i-1];    //shifts the array back to the 0th element of the array. 
         vel[0] = vel[i-1];
-        velocity_final[1] = velocity_final[i-2];
-        i = 1;                // sets the counter back to the first position. 
-      }   
+        velocity_final[0] = velocity_final[i-1];
+        i = 0;                // sets the counter back to the first position. 
+      } 
+      i++;  
   }
 
-  //Time
-  Serial.print("Time: ");
-  Serial.println(millis());
-  myFile.print(millis());
-  myFile.print(",");
-  
-  //Distance
-  Serial.print("Distance: ");
-  Serial.println(dist[i]);
-  myFile.print(dist[i]);
-  myFile.print(",");
+//  //Time
+//  Serial.print("Time: ");
+//  Serial.println(millis());
+//  myFile.print(millis());
+//  myFile.print(",");
+//  
+//  //Distance
+//  Serial.print("Distance: ");
+//  Serial.println(dist[i]);
+//  myFile.print(dist[i]);
+//  myFile.print(",");
 
   velocity_final_final = velocity_final_final/7;  //Average the velocity. 
+  return velocity_final_final;
 
-  //Velocity
-  Serial.print("Velocity: ");
-  Serial.println(velocity_final_final);
-  myFile.println(velocity_final_final);
+//  //Velocity
+//  Serial.print("Velocity: ");
+//  Serial.println(velocity_final_final);
+//  myFile.println(velocity_final_final);
      
 }
 
 double sensordistRead()
 {
+  
   double relative_dist;
   relative_dist = ((sensor.getDistance()/10)+20);
-  return relative_dist; 
+  return relative_dist;
+   
 } 

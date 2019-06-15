@@ -11,6 +11,7 @@
    Date: 02-25-2019
    Last Updated: 05-24-2019
 */
+
 //HEADER FILES
 
 #include <DueTimer.h>
@@ -26,11 +27,11 @@ DFRobotVL53L0X sensor;
 
 unsigned long period = 30000; 
 double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-unsigned int i = 1;
+unsigned int i = 0;
 double V_final = 0.0;
 double velocity_final_final = 0.0;
-double velocity_final[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-double vel[7] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double velocity_final[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double vel[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double previous_velocity = 0.0;
 double current_velocity = 0.0;
 double a = 0.9;
@@ -71,9 +72,18 @@ void setup()
   myFile.println(" ");
   myFile.print("Time");
   myFile.print(",");
-  myFile.println("Distance"); 
-//myFile.print(",");
-//myFile.println("Velocity"); 
+  myFile.print("Distance"); 
+  myFile.print(",");
+  myFile.println("Velocity");
+//  myFile.println("Instantaneous Velocity"); 
+//  myFile.print(" ");
+//  myFile.print("Time");
+//  myFile.print(" ");
+//  myFile.print("Distance");
+//  myFile.print(",");
+//  myFile.print("Velocity"); 
+//  
+  
    
   while(Serial.available()==0){}
   incomingByte = Serial.read();
@@ -96,15 +106,22 @@ void loop()
 //    //Serial.println(S.return_voltage());
     //dist[i] = (sensor.getDistance()/10)+20;
    // i++;
-    velocity_func();
-//    Serial.print("Distance: ");
-//    Serial.println(dist[i]);
-//    myFile.print(dist[i]);
-//    myFile.print(",");
+   
+    V_final = velocity_func();
+    
+    Serial.print("Time: ");
+    Serial.println(millis());
+    myFile.print(millis());
+    myFile.print(",");
+    
+    Serial.print("Distance: ");
+    Serial.println(dist[i]);
+    myFile.print(dist[i]);
+    myFile.print(",");
 //    i++;
-//    Serial.print("Velocity: ");
-//    Serial.println(V_final);
-//    myFile.print(V_final);
+    Serial.print("Velocity: ");
+    Serial.println(V_final);
+    myFile.println(V_final);
 //    myFile.print(",");
 //   // myFile.print("Time: ");
 //    myFile.println(millis());
@@ -134,43 +151,46 @@ void loop()
 //  return velocity;
 //}
 
-
-void velocity_func()
+double velocity_func()
 { 
   
   for(int k = 0; k < 8; k++)
   { 
     dist[i] = sensordistRead();   // Captures the distance  
+    if(dist[i] > 220.00)
+    {
+      dist[i] = dist[i-1]; 
+    }
     vel[i] = (dist[i] - dist[i - 1])/0.038;   // Calculates the velocity 
     current_velocity = vel[i+1];        // current velocity 
     previous_velocity = vel[i-1];     // previous velocity
-    velocity_final[i+1] = a*velocity_final[i] + (1-a)*current_velocity;    // forward euler formula for the velocity. 
+    velocity_final[i+1] = a*velocity_final[i-1] + (1-a)*current_velocity;    // forward euler formula for the velocity. 
     velocity_final_final = velocity_final_final + velocity_final[i+1];      //sum the velocity to a double point variable. 
     
-    
-
-  //Time
-  Serial.print("Time: ");
-  Serial.println(millis());
-  myFile.print(millis());
-  myFile.print(",");
-  
-  //Distance
-  Serial.print("Distance: ");
-  Serial.println(dist[i]);
-  Serial.print("I : ");
-  Serial.println(i);
-  myFile.println(dist[i]);
+//  //Time
+//  Serial.print("Time: ");
+//  Serial.println(millis());
+//  myFile.print(millis());
 //  myFile.print(",");
+//  
+//  //Distance
+//  Serial.print("Distance: ");
+//  Serial.println(dist[i]);
+//  myFile.print(dist[i]);
+//  myFile.print(",");
+//
+//  //Instantaneous Velocity
+//  Serial.print("Instantaneous Velocity: ");
+//  Serial.println(velocity_final[i+1]);
+//  myFile.println(velocity_final[i+1]);
 
     if (i == 7)
       {
         dist[0]=dist[i-1];    //shifts the array back to the 0th element of the array. 
         vel[0]=vel[i-1];    // shifts the velocity array back to the 0th element of the array. 
-        velocity_final[1] = velocity_final[i-2]; // forward euler velocity
-        Serial.print("Action: ");
+        velocity_final[0] = velocity_final[i-1]; // forward euler velocity
         i = 0;                // sets the counter back to the first position. 
-      }
+      }     
       i++;         
   }
 
@@ -188,7 +208,8 @@ void velocity_func()
 //  myFile.print(",");
   
   velocity_final_final = velocity_final_final/7;       //Average the velocity. 
-
+  return velocity_final_final;
+  
 //  Serial.print("Velocity: ");
 //  Serial.println(velocity_final_final);
 //  myFile.println(velocity_final_final);
