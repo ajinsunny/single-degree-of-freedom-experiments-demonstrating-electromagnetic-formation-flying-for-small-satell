@@ -25,14 +25,14 @@
 #include <VL53L0X.h>
 #include "Arduino.h"
 #include "DFRobot_VL53L0X.h"
-#include <math.h>
+#include "math.h"
 
 
 
 DFRobotVL53L0X sensor;   // SENSOR OBJECT
 File myFile;             // FILE OBJECT 
 
-unsigned long period = 900000;  // Count down 15 minute
+unsigned long period = 200000;  // Count down 15 min
 unsigned long startime;
 long previousMillis = 0;
 unsigned long endtime;
@@ -43,34 +43,33 @@ unsigned long endtime;
 long lastMillis = 0;
 long loops = 0;
 double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-const float c = 100;
+const float c = 2/22;
 float t1;
 float t2;
-float k1a = 10;
-float kr = 1;
-float kv = 1;
+double k1a = 22;
+double kr = 1;
+double kv = 1;
 double vel[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double velocity_final[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double V_final;
 float a1 = 0;
 float a2 = 0;
-float desired_dist = 0.30;
-double A_v = 0.0;
-double A_d = 0.0;
+double desired_dist = 0.280;
+double A_v = 0.00;
+double A_d = 0.00;
 double digital_vsine = 0.0;
-double Amplitude = 0.0;
+double Amplitude = 0.00;
 unsigned int i = 0;
 char incomingByte;
 double relative_dist = 0.0;
 double total_dist = 0.0;
-double total_relative_dist = 0.0;
-double velocity_final_final = 0.0;
-double a = 0.9;
-double previous_velocity = 0.0;
-double current_velocity = 0.0;
+double total_relative_dist = 0.00;
+double velocity_final_final = 0.00;
+double a = 0.90;
+double previous_velocity = 0.00;
+double current_velocity = 0.00;
 
 /*--------------------SETUP-------------------------*/
-
 void setup() {
 
   analogReadResolution(10);
@@ -111,9 +110,13 @@ void setup() {
   myFile.print(",");
   myFile.print("Distance"); 
   myFile.print(",");
-  myFile.print("Amplitude Voltage");
+  myFile.print("Velocity"); 
   myFile.print(",");
-  myFile.println("Amplitude Digital");
+  myFile.print("Amplitude Amps");
+  myFile.print(",");
+  myFile.print("Amplitude Voltage Digital");
+  myFile.print(",");
+  myFile.print("Sinusoid Signal");
 
   
   while (Serial.available() == 0) {}
@@ -153,62 +156,71 @@ void loop()
 {
   while (millis() < period)
   {
-    S.startSinusoid1(10,A_d);
+    S.startSinusoid1(10,A_v);
     if(myFile)
     {
     
-    delay(18);
+    //delay(18);
 //    Serial.print("Voltage value: ");
 //    Serial.println(S.return_voltage());
 
 /// COMPUTATION FUNCTION
      
-    for(int i = 0; i < 7; i++)
-    {
-      relative_dist = sensordistRead();
-      total_relative_dist = total_relative_dist + relative_dist;  
-    }
-
-    total_relative_dist = total_relative_dist/7;
+//    for(int i = 0; i < 7; i++)
+//    {
+//      relative_dist = sensordistRead();
+//      total_relative_dist = total_relative_dist + relative_dist;  
+//    }
+//
+//    total_relative_dist = total_relative_dist/7;
 
     V_final = velocity_func();
 
-    A_v = feedback_algorithm(total_relative_dist,V_final);
+    A_v = feedback_algorithm(dist[i],V_final);
     A_d = (A_v*490)/2.75; // Converting voltage to digital
 
- 
-    
     
     
     /// AMPLITUDE UPDATE   
     
     //Time
     Serial.print("Time: ");
-    Serial.println(millis());
-    myFile.print(millis());
+    Serial.print(millis()/1000);
+    Serial.print('.');
+    Serial.println(millis()%1000,4);
+    myFile.print(millis()/1000);
+    myFile.print('.');
+    myFile.print(millis()%1000,4);
     myFile.print(",");
   
     //Distance
     Serial.print("Distance: ");
-    Serial.println(total_relative_dist);
-    myFile.print(total_relative_dist);
+    Serial.println(dist[i],4);
+    myFile.print(dist[i],4);
     myFile.print(",");
   
    //Velocity
     Serial.print("Velocity: ");
-    Serial.println(V_final);
-//    myFile.println(velocity_final_final);
+    Serial.println(V_final,4);
+    myFile.print(V_final,4);
+    myFile.print(",");
 
-    //Voltage Amplitude
-    Serial.print("Amplitude Voltage: ");
-    Serial.println(A_v);
-    myFile.print(A_v);
+    //Current Amplitude
+    Serial.print("Amplitude: ");
+    Serial.println(A_v,4);
+    myFile.print(A_v,4);
     myFile.print(",");
 
     //Digital Amplitude
-    Serial.print("Digital Amplitude: ");
-    Serial.println(A_d);
-    myFile.println(A_d);
+    Serial.print("Digital Voltage Amplitude: ");
+    Serial.println(A_d,4);
+    myFile.print(A_d,4);
+    myFile.print(",");
+
+    //Sinusoid Signal
+    Serial.print("Voltage Signal");
+    Serial.println(S.return_voltage_signal(10,A_v),4);
+    myFile.println(S.return_voltage_signal(10,A_v),4);
     
 
     
@@ -285,11 +297,11 @@ double velocity_func()
   for(int k = 0; k < 8; k++)
   { 
   dist[i] = sensordistRead();
-  if(dist[i] > 220.00)
+  if(dist[i] > 2.20)
     {
       dist[i] = dist[i-1]; 
     }
-  vel[i] = (dist[i] - dist[i-1])/0.038;
+  vel[i] = (dist[i] - dist[i-1])/0.01333;
   current_velocity = vel[i+1];
   previous_velocity = vel[i-1];
   velocity_final[i+1] = a*velocity_final[i-1] + (1-a)*current_velocity; 
@@ -316,7 +328,7 @@ double velocity_func()
 double sensordistRead()
 {
   double actual_relative_dist;
-  actual_relative_dist = ((sensor.getDistance()/1000)+0.2);
+  actual_relative_dist = ((sensor.getDistance()/1000)+0.200);
   return actual_relative_dist; 
 }
 
@@ -326,20 +338,18 @@ double sensordistRead()
 /*----------------FEEDBACK ALGORITHM FUNCTION -----------------*/
 double feedback_algorithm(double dist, double V_final)
 {
-  
   //Current control 
   //Amplitude = k1a * pow(dist,2) * (tanh(kr * (dist - desired_dist)) + c * tanh(kv * V_final));
-
   //New conrtol
   Amplitude = k1a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * V_final)),0.5));
 
-  if(Amplitude > 2.5)
+  if(Amplitude > 2.50)
   {
-  return 2.5;
+  return 2.50;
   }
-  else if(Amplitude < -2.5)
+  else if(Amplitude < -2.50)
   {
-    return -2.5;
+    return -2.50;
   }
 
   else{
@@ -353,6 +363,10 @@ double feedback_algorithm(double dist, double V_final)
 //    {return Amplitude;}
 
 }
+
+
+
+
 
 
 

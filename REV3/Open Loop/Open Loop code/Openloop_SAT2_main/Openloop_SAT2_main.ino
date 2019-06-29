@@ -27,7 +27,7 @@ DFRobotVL53L0X sensor;  //SENSOR OBJECT
 File myFile;            // FILE OBJECT
 
 
-unsigned long period = 30000; 
+unsigned long period = 50000; 
 double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 unsigned int i = 0;
 double V_final = 0.0;

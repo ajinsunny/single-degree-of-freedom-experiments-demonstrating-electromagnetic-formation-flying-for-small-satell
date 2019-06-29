@@ -1,4 +1,4 @@
-
+ 
 /*
    Small Satellite Position Control Software.
    Filename: Open_Loop_SAT1_main.ino
@@ -25,7 +25,7 @@
 char incomingByte;
 DFRobotVL53L0X sensor;
 
-unsigned long period = 30000; 
+unsigned long period = 50000; 
 double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 unsigned int i = 0;
 double V_final = 0.0;
@@ -110,8 +110,8 @@ void loop()
     V_final = velocity_func();
     
     Serial.print("Time: ");
-    Serial.println(millis());
-    myFile.print(millis());
+    Serial.println(millis(/1000));
+    myFile.print(millis()/1000);
     myFile.print(",");
     
     Serial.print("Distance: ");
