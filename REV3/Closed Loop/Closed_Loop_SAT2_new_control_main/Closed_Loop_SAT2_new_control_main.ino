@@ -18,22 +18,27 @@
   TOF SENSOR MEASUREMENT MODES: CONTINUOUS MODE OR SINGLE MODE
 */
 
+
 //HEADER FILES
 #include <VL53L0X.h>
 #include "Arduino.h"
 #include "DFRobot_VL53L0X.h"
 #include <SD.h>
+
 #include <SPI.h>
 #include <DueTimer.h>
 #include <SineWaveDue.h>
+
 #include "math.h"
 
-
-
 DFRobotVL53L0X sensor;   // SENSOR OBJECT
-File myFile;             // FILE OBJECT
+File myFile;             // SAT DATA FILE OBJECT
+File raw_File;           // RAW FILE OBJECT
+//File controlFile;
+//controlFile = SD.open("raw.csv", FILE_WRITE);
 
-unsigned long period = 50000;  // Count down 15 min
+
+unsigned long period = 20000;  // Count down 15 min
 unsigned int startime = 0;
 long previousMillis = 0;
 unsigned int endtime = 0;
@@ -42,18 +47,19 @@ unsigned int stamp_time;
 //unsigned long prev_millis = 0;
 //unsigned long delta_t = 0;
 //unsigned long delta_t1 = 0;
-long lastMillis = 0;
+unsigned int time1 = 0;
 long loops = 0;
-double dist[8]= {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-const float c = 2/12;
+double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+const float c = 2/30;
 float t1;
 float t2;
 float delta_pos;
 float velocity;
-double k2a = 12;
+double k2a = 30;
 float kr = 1;
 float kv = 1;
-double vel[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double vel[9] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double dist_time[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double velocity_final[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double V_final;
 float a1 = 0;
@@ -63,11 +69,13 @@ double Amplitude = 0.00;
 double A_v = 0.00;
 double A_d = 0.00;
 unsigned int i = 0;
+unsigned int j = 1;
+unsigned int n = 0;
 char incomingByte;
 double relative_dist = 0.00;
 double total_relative_dist = 0.00;
 double velocity_final_final = 0.00;
-double a = 0.90;
+double a = 0.00;
 double previous_velocity = 0.00;
 double current_velocity = 0.00;
 
@@ -106,7 +114,11 @@ void setup() {
   sensor.start();
   //delay(20000);
   myFile = SD.open("sat2.csv", FILE_WRITE);
+  raw_File = SD.open("raw.csv", FILE_WRITE);
 
+
+  
+  
   myFile.println(" ");
   myFile.print("Time");
   myFile.print(",");
@@ -119,6 +131,21 @@ void setup() {
   myFile.print("Amplitude Digital");
   myFile.print(",");
   myFile.println("Sinusoid Signal");
+
+  
+  raw_File.print("Time");
+  raw_File.print(",");
+  raw_File.print("Distance");
+  raw_File.print(",");
+  raw_File.print("Velocity");
+  raw_File.print(",");
+  raw_File.println("Filtered Velocity");
+
+//  controlFile.println(" ");
+//  controlFile.print("DAC0");
+//  controlFile.print(",");
+//  controlFile.println("DAC1");
+  
 
 
 //  myFile.print("Start");
@@ -163,7 +190,7 @@ void loop()
 {
   while (millis() < period)
   {
-    S.startSinusoid1(10,A_v);
+    S.startSinusoid_update(10,A_d);
     
     if(myFile)
     {
@@ -194,8 +221,8 @@ void loop()
     
       //Distance
       Serial.print("Distance: ");
-      Serial.println(dist[i],8);
-      myFile.print(dist[i],8);
+      Serial.println(dist[4],8);
+      myFile.print(dist[4],8);
       myFile.print(",");
     
       //Velocity
@@ -213,13 +240,13 @@ void loop()
       //Digital Amplitude
       Serial.print("Amplitude Digital: ");
       Serial.println(A_d,8);
-      myFile.print(A_d,8);
-      myFile.print(",");
+      myFile.println(A_d,8);
+      
   
-      //Sinusoid Signal
-      Serial.print("Sinusoidal Signal");
-      Serial.println(S.return_voltage_signal(10,A_v),8);
-      myFile.println(S.return_voltage_signal(10,A_v),8);
+//      //Sinusoid Signal
+//      Serial.print("Sinusoidal Signal");
+//      Serial.println(S.return_voltage_signal(10,A_v),8);
+//      myFile.println(S.return_voltage_signal(10,A_v),8);
 
       
       endtime = millis();
@@ -231,26 +258,33 @@ void loop()
       {
         delay(100-(endtime-startime));
         Serial.println("Action1"); 
-      A_v = feedback_algorithm(dist[i],V_final);
-      A_d = (A_v*490)/2.75;  // Converting voltage to digital
+        A_v = feedback_algorithm(dist[4],V_final);
+        A_d = (A_v*490)/2.75;  // Converting voltage to digital
+        unsigned int endtime2 = millis();
+        Serial.print("Diff2: ");
+        Serial.println(endtime2-startime); 
       }
-
-      if((endtime-startime) > 100)
-      {
-        delay((endtime-startime)-100);
-        Serial.println("Action2");
-        A_v = feedback_algorithm(dist[i],V_final);
-        A_d = (A_v*490)/2.75;
-      }
+      
+//
+//      if((endtime-startime) > 100)
+//      {
+//        delay((endtime-startime)-100);
+//        Serial.println("Action2");
+//        A_v = feedback_algorithm(dist[i],V_final);
+//        A_d = (A_v*490)/2.75;
+//        unsigned int endtime2 = millis();
+//        Serial.print("Diff2: ");
+//        Serial.println(endtime2-startime);
+//       
+//      }
 
       else{
         A_v = feedback_algorithm(dist[i],V_final);
         A_d = (A_v*490)/2.75;  
       }
 
-//      unsigned int endtime2 = millis();
-//      Serial.print("Diff2: ");
-//      Serial.println(endtime2-startime);
+      
+      
 //      int waitime = 100-(endtime-startime);
 //      Serial.print("Wait: ");
 //      Serial.println(waitime);
@@ -315,9 +349,13 @@ void loop()
 //    S.stopSinusoid();
   
   }
-  S.stopSinusoid(); 
+  S.stopSinusoid();
+  //S.print_voltage_signal();
   }
   myFile.close();
+  raw_File.close();
+//  controlFile.close();
+  
   exit(0);
 }
 
@@ -381,44 +419,109 @@ double velocity_func()
 //  delta_pos = dist[i] - dist[i - 1];
 //  velocity = delta_pos/0.016;
 //  return velocity;
-
-  for(int k = 0; k < 7; k++)
+//  dist[i] = sensordistRead();
+//  dist_time[i] = millis();
+  
+//  raw_File.print(dist_time[i]);
+//  raw_File.print(",");
+//  raw_File.println(dist[i]);
+  
+//  i++;
+  
+  for(int k = 0; k < 5; k++)
   {
-//  Serial.print("Start: ");
-//  Serial.println(millis());
-//  myFile.print(millis());
-//  myFile.print(",");
-
-
+    
   dist[i] = sensordistRead();
   if(dist[i] > 2.20)
     {
       dist[i] = dist[i-1]; 
     }
-  vel[i] = (dist[i] - dist[i-1])/0.01333; 
-  current_velocity = vel[i+1];
-  previous_velocity = vel[i-1]; 
-  velocity_final[i+1] = a*velocity_final[i-1] + (1-a)*current_velocity; 
-  velocity_final_final = velocity_final_final + velocity_final[i+1];
+//  Serial.print(dist[i]);
+//  Serial.print(",");
+//  Serial.println(i);
+  dist_time[i] = millis();
+  
+//  raw_File.print(dist_time[i]);
+//  raw_File.print(",");
+//  raw_File.print(dist[i],7);
+//  raw_File.print(",");
+
+  vel[j] = (dist[i] - dist[i-1])/(dist_time[i]-dist_time[i-1]);
+  
+//  raw_File.print(vel[j],7);
+//  raw_File.print(",");
+
+  current_velocity = vel[j];
+  previous_velocity = vel[i-1];
+  velocity_final[i] = a*velocity_final[i-1] + (1-a)*current_velocity;
+  
+//  raw_File.println(velocity_final[i],7); 
+
+  velocity_final_final = velocity_final_final + velocity_final[i];   //sum the velocity to a double point variable
+
+  if (i == 4)
+    {
+        dist[0]=dist[i];    //shifts the array back to the 0th element of the array. 
+        //vel[0] = vel[i-1];    // shifts the velocity array back to the 0th element of the array.
+        dist_time[0] = dist_time[i];
+        velocity_final[0] = velocity_final[i];
+        i = 0;                // sets the counter back to the first position. 
+        j = 0;
+    }
+  i++;
+  j++;
+
+//  if(dist[i] > 2.20)
+//    {
+//      dist[i] = dist[i-1]; 
+//    }
+    
+//  raw_File.print(millis());  
+//  raw_File.print(",");
+//  raw_File.println(dist[i],8);
+
+//  vel[j] = (dist[i] - dist[i-1])/(dist_time[i] - dist_time[i-1]);
+// 
+//  velocity_final[n+1] = a*velocity_final[n] + (1-a)*vel[j];
+//  velocity_final_final = velocity_final_final + velocity_final[n+1];
+//  
+//  j++;
+//  i++;
+//  n++;
+//  
+  
+   
+
+//  if(i==5 & j==4 & n==4)
+//    {
+//      
+////    dist[0] = dist[i-1]; //shift the array back to the 0th element of the array.
+////    vel[0] = vel[i-1];   // shifts the velocity array back to the 0th element of the array. 
+//////  velocity_final[0] = velocity_final[i-1];
+//      i = 0;// sets the counter back to the first position. 
+//      j = 0;
+//      n = 0;
+//     
+//      
+//    }
+  
+//  current_velocity = vel[i+1];
+//  previous_velocity = vel[i-1]; 
+//  velocity_final[i+1] = a*velocity_final[i-1] + (1-a)*current_velocity; 
+//  velocity_final_final = velocity_final_final + velocity_final[i+1];
  
   
-  if(i==7)
-    {
-      dist[0] = dist[i-1]; //shift the array back to the 0th element of the array.
-      vel[0] = vel[i-1];   // shifts the velocity array back to the 0th element of the array. 
-      velocity_final[0] = velocity_final[i-1];
-      i = 0;               // sets the counter back to the first position. 
-    }
-     i++;
 
      
+
 //  myFile.println(millis());   
 //  Serial.print("End:");
 //  Serial.println(millis());
   }
+  //raw_File.println("Loop Done");
 
-
-  velocity_final_final = velocity_final_final/7;  //Average velocity.
+  //Serial.println(dist[i]);
+  velocity_final_final = velocity_final_final/5;  //Average velocity.
 
   return velocity_final_final;
   
@@ -432,8 +535,6 @@ double sensordistRead()
   actual_relative_dist = ((sensor.getDistance()/1000)+0.200);
   return actual_relative_dist; 
 }
-
-
 
 
 /*----------------FEEDBACK ALGORITHM FUNCTION -----------------*/
@@ -451,18 +552,20 @@ double feedback_algorithm(double dist, double V_final)
     Amplitude = -1 * k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * V_final)),0.5));
   }
 
-  if(Amplitude > 2.50)
+  if(Amplitude > 3.535)
     {
-    return 2.50;
+    return 3.535;
     }
-    else if(Amplitude < -2.50)
+    else if(Amplitude < -3.535)
     {
-      return -2.50;
+      return -3.535;
     }
   
     else{
       return Amplitude;
     }
+
+    
 //  if (Amplitude > 2.8)
 //  {
 //  return 2.8; 

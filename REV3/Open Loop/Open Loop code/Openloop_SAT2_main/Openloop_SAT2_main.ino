@@ -36,6 +36,7 @@ double velocity_final[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double vel[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0}; 
 double previous_velocity = 0.0;
 double current_velocity = 0.0;
+float Amplitude;
 double a = 0.9;
 
 
@@ -76,7 +77,11 @@ void setup()
   myFile.print(",");
   myFile.print("Distance"); 
   myFile.print(",");
-  myFile.println("Velocity"); 
+  myFile.print("Velocity");
+  myFile.print(",");
+  myFile.print("Digital Amplitude");
+  myFile.print(",");
+  myFile.println("Amplitude"); 
   
   while(Serial.available()==0){}
   incomingByte = Serial.read();
@@ -115,7 +120,19 @@ void loop()
 
      Serial.print("Velocity: ");
      Serial.println(V_final);
-     myFile.println(V_final);
+     myFile.print(V_final);
+     
+     Serial.print("Digital Amplitude: ");
+     Serial.println(S.returnAmplitude());
+     myFile.print(S.returnAmplitude());
+     myFile.print(",");
+  
+     Amplitude = (S.returnAmplitude() * 2.16)/490;
+      
+     Serial.print("Amplitude: ");
+     Serial.println(Amplitude);
+     myFile.println(Amplitude);
+
      
 //    Serial.print("Velocity: ");
 //    Serial.println(V_final);

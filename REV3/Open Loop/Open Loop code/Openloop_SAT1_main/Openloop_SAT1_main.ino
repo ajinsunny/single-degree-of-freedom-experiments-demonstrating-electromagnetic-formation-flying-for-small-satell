@@ -1,4 +1,3 @@
- 
 /*
    Small Satellite Position Control Software.
    Filename: Open_Loop_SAT1_main.ino
@@ -35,6 +34,7 @@ double vel[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double previous_velocity = 0.0;
 double current_velocity = 0.0;
 double a = 0.9;
+float Amplitude;
 File myFile;
 
 void setup()  
@@ -74,7 +74,12 @@ void setup()
   myFile.print(",");
   myFile.print("Distance"); 
   myFile.print(",");
-  myFile.println("Velocity");
+  myFile.print("Velocity");
+  myFile.print(",");
+  myFile.print("Digital Amplitude");
+  myFile.print(",");
+  myFile.println("Amplitude");
+  
 //  myFile.println("Instantaneous Velocity"); 
 //  myFile.print(" ");
 //  myFile.print("Time");
@@ -110,8 +115,8 @@ void loop()
     V_final = velocity_func();
     
     Serial.print("Time: ");
-    Serial.println(millis(/1000));
-    myFile.print(millis()/1000);
+    Serial.println(millis());
+    myFile.print(millis());
     myFile.print(",");
     
     Serial.print("Distance: ");
@@ -120,8 +125,22 @@ void loop()
     myFile.print(",");
 //    i++;
     Serial.print("Velocity: ");
-    Serial.println(V_final);
-    myFile.println(V_final);
+    Serial.print(V_final);
+    myFile.print(V_final);
+    myFile.print(",");
+
+    Serial.print("Digital Amplitude: ");
+    Serial.println(S.returnAmplitude());
+    myFile.print(S.returnAmplitude());
+    myFile.print(",");
+
+    Amplitude = (S.returnAmplitude() * 2.16)/490;
+    
+    Serial.print("Amplitude: ");
+    Serial.println(Amplitude);
+    myFile.println(Amplitude);
+
+    
 //    myFile.print(",");
 //   // myFile.print("Time: ");
 //    myFile.println(millis());
