@@ -1,5 +1,3 @@
-
-
 /*
    Small Satellite Position Control Software.
    Filename: Closed_Loop_SAT2_main.ino
@@ -10,37 +8,27 @@
    Written for Thesis: One dimensional Electromagnetic Actuation and Pulse Sensing.
    Version: 1.0
    Date: 02-25-2019
-
-
+   Last Updated: 07-05-2019
 */
-
-/*
-  TOF SENSOR MEASUREMENT MODES: CONTINUOUS MODE OR SINGLE MODE
-*/
-
 
 //HEADER FILES
+#include <DueTimer.h>
 #include <VL53L0X.h>
+#include <SineWaveDue.h>
+#include <SD.h>
+#include <SPI.h>
 #include "Arduino.h"
 #include "DFRobot_VL53L0X.h"
-#include <SD.h>
-
-#include <SPI.h>
-#include <DueTimer.h>
-#include <SineWaveDue.h>
-
 #include "math.h"
 
 DFRobotVL53L0X sensor;   // SENSOR OBJECT
 File myFile;             // SAT DATA FILE OBJECT
 File raw_File;           // RAW FILE OBJECT
-//File controlFile;
-//controlFile = SD.open("raw.csv", FILE_WRITE);
 
 
-unsigned long period = 20000;  // Count down 15 min
+
+unsigned long period = 50000; // Experiment time in milliseconds
 unsigned int startime = 0;
-long previousMillis = 0;
 unsigned int endtime = 0;
 unsigned int stamp_time;
 //unsigned long lastTick;
@@ -50,12 +38,12 @@ unsigned int stamp_time;
 unsigned int time1 = 0;
 long loops = 0;
 double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-const float c = 2/30;
+const float c = 9.5 ;
 float t1;
 float t2;
 float delta_pos;
 float velocity;
-double k2a = 30;
+double k2a = 29;
 float kr = 1;
 float kv = 1;
 double vel[9] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
@@ -75,7 +63,7 @@ char incomingByte;
 double relative_dist = 0.00;
 double total_relative_dist = 0.00;
 double velocity_final_final = 0.00;
-double a = 0.00;
+double a = 0.5;
 double previous_velocity = 0.00;
 double current_velocity = 0.00;
 
@@ -117,9 +105,6 @@ void setup() {
   raw_File = SD.open("raw.csv", FILE_WRITE);
 
 
-  
-  
-  myFile.println(" ");
   myFile.print("Time");
   myFile.print(",");
   myFile.print("Distance"); 
@@ -231,13 +216,13 @@ void loop()
       myFile.print(V_final,8);
       myFile.print(",");
   
-      //Current Amplitude
+      //Feedback Amplitude (u_2)
       Serial.print("Amplitude: ");
       Serial.println(A_v,8);
       myFile.print(A_v,8);
       myFile.print(",");
       
-      //Digital Amplitude
+      //Feedback Digital Amplitude (For Arduino)
       Serial.print("Amplitude Digital: ");
       Serial.println(A_d,8);
       myFile.println(A_d,8);
@@ -279,7 +264,7 @@ void loop()
 //      }
 
       else{
-        A_v = feedback_algorithm(dist[i],V_final);
+        A_v = feedback_algorithm(dist[4],V_final);
         A_d = (A_v*490)/2.75;  
       }
 
@@ -466,7 +451,7 @@ double velocity_func()
         dist_time[0] = dist_time[i];
         velocity_final[0] = velocity_final[i];
         i = 0;                // sets the counter back to the first position. 
-        j = 0;
+        j = 1;
     }
   i++;
   j++;
@@ -521,7 +506,7 @@ double velocity_func()
   //raw_File.println("Loop Done");
 
   //Serial.println(dist[i]);
-  velocity_final_final = velocity_final_final/5;  //Average velocity.
+  velocity_final_final = velocity_final_final/4;  //Average velocity.
 
   return velocity_final_final;
   
