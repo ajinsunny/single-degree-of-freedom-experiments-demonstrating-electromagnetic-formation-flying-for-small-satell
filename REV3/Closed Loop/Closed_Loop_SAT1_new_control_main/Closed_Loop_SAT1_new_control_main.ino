@@ -28,7 +28,7 @@ DFRobotVL53L0X sensor;   // Sensor File Object
 File myFile;             // File Objec
 File raw_File;           // Raw File Object
 
-unsigned long period = 50000;  // Experiment time in milliseconds
+unsigned long period = 10000;  // Experiment time in milliseconds
 unsigned long startime;
 unsigned long endtime;
 //unsigned long lastTick;
@@ -61,7 +61,7 @@ double relative_dist = 0.0;
 double total_dist = 0.0;
 double total_relative_dist = 0.00;
 double velocity_final_final = 0.00;
-double a = 0.5;
+double a = 0.7;
 double previous_velocity = 0.00;
 double current_velocity = 0.00;
 
@@ -374,16 +374,24 @@ double velocity_func()
     {
       dist[i] = dist[i-1]; 
     }
-    dist_time[i] = millis();
+    dist_time[i] = (double)millis()/1000;
     
-//  raw_File.print(millis());  
-//  raw_File.print(",");
-//  raw_File.println(dist[i],8);
+  raw_File.print(millis());  
+  raw_File.print(",");
+  raw_File.print(dist[i],7);
+  raw_File.print(",");
   
   vel[j] = (dist[i] - dist[i-1])/(dist_time[i]-dist_time[i-1]);
+
+  raw_File.print(vel[j],7);
+  raw_File.print(",");
+  
   current_velocity = vel[j];
   previous_velocity = vel[i-1];
   velocity_final[i] = a*velocity_final[i-1] + (1-a)*current_velocity;
+
+  raw_File.println(velocity_final[i],7);
+ 
   velocity_final_final = velocity_final_final + velocity_final[i];   //sum the velocity to a double point variable.
  
   
@@ -400,7 +408,7 @@ double velocity_func()
     j++;
      
   }
-  velocity_final_final = velocity_final_final/4; //Average the velocity. 
+  velocity_final_final = velocity_final_final/5; //Average the velocity. 
   
   return velocity_final_final;
 }

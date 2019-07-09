@@ -27,7 +27,7 @@ File raw_File;           // RAW FILE OBJECT
 
 
 
-unsigned long period = 50000; // Experiment time in milliseconds
+unsigned long period = 10000; // Experiment time in milliseconds
 unsigned int startime = 0;
 unsigned int endtime = 0;
 unsigned int stamp_time;
@@ -63,7 +63,7 @@ char incomingByte;
 double relative_dist = 0.00;
 double total_relative_dist = 0.00;
 double velocity_final_final = 0.00;
-double a = 0.5;
+double a = 0.7;
 double previous_velocity = 0.00;
 double current_velocity = 0.00;
 
@@ -424,23 +424,23 @@ double velocity_func()
 //  Serial.print(dist[i]);
 //  Serial.print(",");
 //  Serial.println(i);
-  dist_time[i] = millis();
+  dist_time[i] = (double)millis()/1000;
   
-//  raw_File.print(dist_time[i]);
-//  raw_File.print(",");
-//  raw_File.print(dist[i],7);
-//  raw_File.print(",");
+  raw_File.print(dist_time[i]);
+  raw_File.print(",");
+  raw_File.print(dist[i],7);
+  raw_File.print(",");
 
   vel[j] = (dist[i] - dist[i-1])/(dist_time[i]-dist_time[i-1]);
   
-//  raw_File.print(vel[j],7);
-//  raw_File.print(",");
+  raw_File.print(vel[j],7);
+  raw_File.print(",");
 
   current_velocity = vel[j];
   previous_velocity = vel[i-1];
   velocity_final[i] = a*velocity_final[i-1] + (1-a)*current_velocity;
   
-//  raw_File.println(velocity_final[i],7); 
+  raw_File.println(velocity_final[i],7); 
 
   velocity_final_final = velocity_final_final + velocity_final[i];   //sum the velocity to a double point variable
 
@@ -506,7 +506,7 @@ double velocity_func()
   //raw_File.println("Loop Done");
 
   //Serial.println(dist[i]);
-  velocity_final_final = velocity_final_final/4;  //Average velocity.
+  velocity_final_final = velocity_final_final/5;  //Average velocity.
 
   return velocity_final_final;
   
