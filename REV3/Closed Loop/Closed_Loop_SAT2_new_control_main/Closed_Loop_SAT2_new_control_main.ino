@@ -63,7 +63,7 @@ char incomingByte;
 double relative_dist = 0.00;
 double total_relative_dist = 0.00;
 double velocity_final_final = 0.00;
-double a = 0.7;
+double a = 0.3;
 double previous_velocity = 0.00;
 double current_velocity = 0.00;
 
