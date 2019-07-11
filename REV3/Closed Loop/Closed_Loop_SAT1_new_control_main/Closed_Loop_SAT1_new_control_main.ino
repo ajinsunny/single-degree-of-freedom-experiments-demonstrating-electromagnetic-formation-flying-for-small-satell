@@ -28,7 +28,7 @@ DFRobotVL53L0X sensor;   // Sensor File Object
 File myFile;             // File Objec
 File raw_File;           // Raw File Object
 
-unsigned long period = 10000;  // Experiment time in milliseconds
+unsigned long period = 60000;  // Experiment time in milliseconds
 unsigned long startime;
 unsigned long endtime;
 //unsigned long lastTick;
@@ -37,7 +37,7 @@ unsigned long endtime;
 //unsigned long delta_t1 = 0;
 long loops = 0;
 double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-const float c = 9.5;
+const float c = 10;
 float t1;
 float t2;
 double k1a = 29;
@@ -61,7 +61,7 @@ double relative_dist = 0.0;
 double total_dist = 0.0;
 double total_relative_dist = 0.00;
 double velocity_final_final = 0.00;
-double a = 0.3;
+double a = 0.5;
 double previous_velocity = 0.00;
 double current_velocity = 0.00;
 
@@ -411,6 +411,7 @@ double velocity_func()
   velocity_final_final = velocity_final_final/5; //Average the velocity. 
   
   return velocity_final_final;
+  
 }
 
 
