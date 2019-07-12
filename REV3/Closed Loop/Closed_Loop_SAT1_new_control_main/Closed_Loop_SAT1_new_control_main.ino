@@ -37,7 +37,7 @@ unsigned long endtime;
 //unsigned long delta_t1 = 0;
 long loops = 0;
 double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-const float c = 10;
+const float c = 9.5;
 float t1;
 float t2;
 double k1a = 29;
@@ -100,6 +100,7 @@ void setup() {
   //Laser rangefinder begins to work
   sensor.start();
   myFile = SD.open("sat1.csv", FILE_WRITE);
+  raw_File = SD.open("raw.csv", FILE_WRITE);
 
   myFile.print("Time");
   myFile.print(",");
@@ -419,7 +420,7 @@ double velocity_func()
 double sensordistRead()
 {
   double actual_relative_dist;
-  actual_relative_dist = ((sensor.getDistance()/1000)+0.200);
+  actual_relative_dist = ((sensor.getDistance()/1000)+0.265);
   return actual_relative_dist; 
 }
 

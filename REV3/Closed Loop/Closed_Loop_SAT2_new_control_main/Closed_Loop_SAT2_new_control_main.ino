@@ -38,7 +38,7 @@ unsigned int stamp_time;
 unsigned int time1 = 0;
 long loops = 0;
 double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-const float c = 10 ;
+const float c = 9.5 ;
 float t1;
 float t2;
 float delta_pos;
@@ -517,7 +517,7 @@ double velocity_func()
 double sensordistRead()
 { 
   double actual_relative_dist;
-  actual_relative_dist = ((sensor.getDistance()/1000)+0.200);
+  actual_relative_dist = ((sensor.getDistance()/1000)+0.265);
   return actual_relative_dist; 
 }
 
