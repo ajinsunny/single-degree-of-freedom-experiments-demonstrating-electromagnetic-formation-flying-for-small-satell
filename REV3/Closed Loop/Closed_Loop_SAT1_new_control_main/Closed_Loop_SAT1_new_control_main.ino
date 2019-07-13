@@ -377,21 +377,25 @@ double velocity_func()
     }
     dist_time[i] = (double)millis()/1000;
     
-  raw_File.print(millis());  
-  raw_File.print(",");
-  raw_File.print(dist[i],7);
-  raw_File.print(",");
+//  raw_File.print(millis());  
+//  raw_File.print(",");
+//  raw_File.print(dist[i],7);
+//  raw_File.print(",");
   
-  vel[j] = (dist[i] - dist[i-1])/(dist_time[i]-dist_time[i-1]);
+  vel[j] = (dist[i]/dist_time[i])-(dist[i-1]/dist_time[i-1]);
 
-  raw_File.print(vel[j],7);
-  raw_File.print(",");
+//  raw_File.print(vel[j],7);
+//  raw_File.print(",");
   
   current_velocity = vel[j];
   previous_velocity = vel[i-1];
   velocity_final[i] = a*velocity_final[i-1] + (1-a)*current_velocity;
+  if(velocity_final[i] > 0.20)
+  {
+    velocity_final[i]=velocity_final[i-1];
+  }
 
-  raw_File.println(velocity_final[i],7);
+//  raw_File.println(velocity_final[i],7);
  
   velocity_final_final = velocity_final_final + velocity_final[i];   //sum the velocity to a double point variable.
  
@@ -420,7 +424,7 @@ double velocity_func()
 double sensordistRead()
 {
   double actual_relative_dist;
-  actual_relative_dist = ((sensor.getDistance()/1000)+0.265);
+  actual_relative_dist = ((sensor.getDistance()/1000)+0.200);
   return actual_relative_dist; 
 }
 
