@@ -43,7 +43,7 @@ float t1;
 float t2;
 float delta_pos;
 float velocity;
-double k2a = 29;
+double k2a = 28;
 float kr = 1;
 float kv = 1;
 double vel[9] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
@@ -63,7 +63,7 @@ char incomingByte;
 double relative_dist = 0.00;
 double total_relative_dist = 0.00;
 double velocity_final_final = 0.00;
-double a = 0.5;
+double a = 0.95;
 double previous_velocity = 0.00;
 double current_velocity = 0.00;
 
@@ -431,7 +431,7 @@ double velocity_func()
 //  raw_File.print(dist[i],7);
 //  raw_File.print(",");
 
-  vel[j] = (dist[i]/dist_time[i])-(dist[i-1]/dist_time[i-1]);
+  vel[j] = (dist[i]-dist[i-1])/(dist_time[i]-dist_time[i-1]);
   
 //  raw_File.print(vel[j],7);
 //  raw_File.print(",");

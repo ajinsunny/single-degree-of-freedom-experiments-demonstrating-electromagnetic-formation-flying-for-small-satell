@@ -40,7 +40,7 @@ double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 const float c = 9.5;
 float t1;
 float t2;
-double k1a = 29;
+double k1a = 28;
 double kr = 1;
 double kv = 1;
 double vel[9] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
@@ -61,7 +61,7 @@ double relative_dist = 0.0;
 double total_dist = 0.0;
 double total_relative_dist = 0.00;
 double velocity_final_final = 0.00;
-double a = 0.5;
+double a = 0.95;
 double previous_velocity = 0.00;
 double current_velocity = 0.00;
 
@@ -382,7 +382,8 @@ double velocity_func()
 //  raw_File.print(dist[i],7);
 //  raw_File.print(",");
   
-  vel[j] = (dist[i]/dist_time[i])-(dist[i-1]/dist_time[i-1]);
+   vel[j] = (dist[i]-dist[i-1])/(dist_time[i]-dist_time[i-1]);
+
 
 //  raw_File.print(vel[j],7);
 //  raw_File.print(",");
