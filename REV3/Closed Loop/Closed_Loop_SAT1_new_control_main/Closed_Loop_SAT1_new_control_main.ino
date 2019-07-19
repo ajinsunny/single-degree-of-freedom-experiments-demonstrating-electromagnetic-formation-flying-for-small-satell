@@ -28,7 +28,7 @@ DFRobotVL53L0X sensor;   // Sensor File Object
 File myFile;             // File Objec
 File raw_File;           // Raw File Object
 
-unsigned long period = 60000;  // Experiment time in milliseconds
+unsigned long period = 100000;  // Experiment time in milliseconds
 unsigned long startime;
 unsigned long endtime;
 //unsigned long lastTick;
@@ -37,15 +37,17 @@ unsigned long endtime;
 //unsigned long delta_t1 = 0;
 long loops = 0;
 double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-const float c = 9.5;
+const float c = 8.5;
 float t1;
 float t2;
-double k1a = 28;
+double k1a = 28.5;
 double kr = 1;
 double kv = 1;
 double vel[9] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double dist_time[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-double velocity_final[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double dist_filtered[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+double velocity_final[4] = {0.0,0.0,0.0};
+double return_vel;
 double V_final;
 float a1 = 0;
 float a2 = 0;
@@ -56,12 +58,14 @@ double digital_vsine = 0.0;
 double Amplitude = 0.00;
 unsigned int i = 0;
 unsigned int j = 1;
+unsigned int k = 1;
 char incomingByte;
 double relative_dist = 0.0;
 double total_dist = 0.0;
 double total_relative_dist = 0.00;
 double velocity_final_final = 0.00;
-double a = 0.95;
+double a = 0.97;
+//double b = 0.95;
 double previous_velocity = 0.00;
 double current_velocity = 0.00;
 
@@ -375,48 +379,60 @@ double velocity_func()
     {
       dist[i] = dist[i-1]; 
     }
-    dist_time[i] = (double)millis()/1000;
+
+// dist_filtered[i] = b*dist_filtered[i-1] + (1-b)*dist[i];
+    
+   dist_time[i] = (double)millis()/1000;
     
 //  raw_File.print(millis());  
 //  raw_File.print(",");
 //  raw_File.print(dist[i],7);
 //  raw_File.print(",");
-  
    vel[j] = (dist[i]-dist[i-1])/(dist_time[i]-dist_time[i-1]);
-
-
 //  raw_File.print(vel[j],7);
 //  raw_File.print(",");
   
-  current_velocity = vel[j];
-  previous_velocity = vel[i-1];
-  velocity_final[i] = a*velocity_final[i-1] + (1-a)*current_velocity;
-  if(velocity_final[i] > 0.20)
-  {
-    velocity_final[i]=velocity_final[i-1];
-  }
+  //current_velocity = vel[j];
+  //previous_velocity = vel[i-1];
+  
+//  if(vel[j] > 0.20)
+//  {
+//    vel[j]=vel[j-1];
+//  }
 
 //  raw_File.println(velocity_final[i],7);
  
-  velocity_final_final = velocity_final_final + velocity_final[i];   //sum the velocity to a double point variable.
+  velocity_final_final = velocity_final_final + vel[j];   //sum the velocity to a double point variable.
  
   
   if (i == 4)
       {
-        dist[0]=dist[i];    //shifts the array back to the 0th element of the array. 
+        dist[0]=dist[i];    //shifts the array back to the 0th element of the array.
+        //dist_filtered[0] = dist_filtered[i]; 
         //vel[0] = vel[i-1];    // shifts the velocity array back to the 0th element of the array.
         dist_time[0] = dist_time[i];
-        velocity_final[0] = velocity_final[i];
-        i = 0;                // sets the counter back to the first position. 
+        vel[0] = vel[j];
+        i = 0;              // sets the counter back to the first position. 
         j = 1;
       }
     i++;
     j++;
      
   }
-  velocity_final_final = velocity_final_final/5; //Average the velocity. 
   
-  return velocity_final_final;
+  velocity_final_final = velocity_final_final/5; //Average the velocity. 
+  velocity_final[k] = a*velocity_final[k-1] + (1-a)*velocity_final_final;
+  return_vel = velocity_final[k];
+  
+  if(k==2)
+  {
+    velocity_final[0] = velocity_final[k];
+    k=0;
+  }
+  
+  k++;
+  
+  return return_vel;
   
 }
 
@@ -425,7 +441,7 @@ double velocity_func()
 double sensordistRead()
 {
   double actual_relative_dist;
-  actual_relative_dist = ((sensor.getDistance()/1000)+0.200);
+  actual_relative_dist = ((sensor.getDistance()/1000.00)+0.215605029);
   return actual_relative_dist; 
 }
 

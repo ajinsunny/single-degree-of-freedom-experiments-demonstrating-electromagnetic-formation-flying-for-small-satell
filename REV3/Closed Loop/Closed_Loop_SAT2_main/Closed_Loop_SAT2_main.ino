@@ -27,6 +27,7 @@
 
 DFRobotVL53L0X sensor;   // SENSOR OBJECT
 File myFile;             // FILE OBJECT
+File raw_File;           // Raw File Object
 
 unsigned long period = 60000;  // Count down 1 minute
 unsigned long startime;
