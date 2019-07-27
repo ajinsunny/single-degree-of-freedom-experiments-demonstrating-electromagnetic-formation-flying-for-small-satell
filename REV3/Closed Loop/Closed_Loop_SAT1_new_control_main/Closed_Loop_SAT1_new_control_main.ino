@@ -46,7 +46,7 @@ double kv = 1;
 double vel[9] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double dist_time[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double dist_filtered[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-double velocity_final[4] = {0.0,0.0,0.0};
+double velocity_final[4] = {0.0,0.0,0.0,0.0};
 double return_vel;
 double V_final;
 float a1 = 0;
@@ -56,7 +56,7 @@ double A_v = 0.00;
 double A_d = 0.00;
 double digital_vsine = 0.0;
 double Amplitude = 0.00;
-unsigned int i = 0;
+unsigned int i = 1;
 unsigned int j = 1;
 unsigned int k = 1;
 char incomingByte;
@@ -104,7 +104,8 @@ void setup() {
   //Laser rangefinder begins to work
   sensor.start();
   myFile = SD.open("sat1.csv", FILE_WRITE);
-  raw_File = SD.open("raw.csv", FILE_WRITE);
+  raw_File = SD.open("raw1.csv", FILE_WRITE);
+  
 
   myFile.print("Time");
   myFile.print(",");
@@ -120,11 +121,13 @@ void setup() {
   
   raw_File.print("Time");
   raw_File.print(",");
-  raw_File.print("Distance");
+  raw_File.print("Raw Distance");
   raw_File.print(",");
-  raw_File.print("Velocity");
+  raw_File.print("Raw Velocity");
   raw_File.print(",");
-  raw_File.println("Filtered Velocity");
+  raw_File.println("Raw Filtered Velocity");
+  
+//  raw_File.println("Filtered Velocity");
 
   
   while (Serial.available() == 0) {}
@@ -194,8 +197,8 @@ void loop()
     
       //Distance
       Serial.print("Distance: ");
-      Serial.println(dist[4],8);
-      myFile.print(dist[4],8);
+      Serial.println(dist[i-1],8);
+      myFile.print(dist[i-1],8);
       myFile.print(",");
     
       //Velocity
@@ -229,7 +232,7 @@ void loop()
       {
         delay(100-(endtime-startime));
         Serial.println("Action1"); 
-        A_v = feedback_algorithm(dist[4],V_final);
+        A_v = feedback_algorithm(dist[i-1],V_final);
         A_d = (A_v*490)/2.75;  // Converting voltage to digital
         unsigned int endtime2 = millis();
         Serial.print("Diff2: ");
@@ -248,14 +251,13 @@ void loop()
 //        Serial.println(endtime2-startime);
 //       
 //      }
-
       else{
-        A_v = feedback_algorithm(dist[4],V_final);
+        A_v = feedback_algorithm(dist[i-1],V_final);
         A_d = (A_v*490)/2.75;  
       }
 
-      
-      
+
+          
 //      int waitime = 100-(endtime-startime);
 //      Serial.print("Wait: ");
 //      Serial.println(waitime);
@@ -372,65 +374,77 @@ void loop()
 
 double velocity_func()
 {
-  for(int k = 0; k < 5; k++)
-  { 
+  
+//  for(int k = 0; k < 3; k++)
+//  { 
+
   dist[i] = sensordistRead();
-  if(dist[i] > 2.20)
+  if(dist[i] > 1.50)
     {
       dist[i] = dist[i-1]; 
     }
-
 // dist_filtered[i] = b*dist_filtered[i-1] + (1-b)*dist[i];
-    
-   dist_time[i] = (double)millis()/1000;
-    
-//  raw_File.print(millis());  
+  dist_time[i] = (double)millis()/1000;
+   
+//  raw_File.print(dist_time[i],8);  
 //  raw_File.print(",");
-//  raw_File.print(dist[i],7);
+//  raw_File.print(dist[i],8);
 //  raw_File.print(",");
-   vel[j] = (dist[i]-dist[i-1])/(dist_time[i]-dist_time[i-1]);
-//  raw_File.print(vel[j],7);
+   
+  vel[j] = (dist[i]-dist[i-1])/(dist_time[i]-dist_time[i-1]);
+  
+  if(vel[j] > 0.20 | vel[j] < -0.20)
+  {
+    vel[j]=vel[j-1];
+  }
+  
+  velocity_final[i] = a*velocity_final[i-1] + (1-a)*vel[j];
+  return_vel = velocity_final[i];
+
+//  raw_File.print(vel[j],8);
 //  raw_File.print(",");
+//  raw_File.println(return_vel,8);
   
   //current_velocity = vel[j];
   //previous_velocity = vel[i-1];
   
-//  if(vel[j] > 0.20)
-//  {
-//    vel[j]=vel[j-1];
-//  }
-
 //  raw_File.println(velocity_final[i],7);
  
-  velocity_final_final = velocity_final_final + vel[j];   //sum the velocity to a double point variable.
- 
-  
-  if (i == 4)
+//  velocity_final_final = velocity_final_final + vel[j];   //sum the velocity to a double point variable.
+   
+  if (i == 3)
       {
         dist[0]=dist[i];    //shifts the array back to the 0th element of the array.
         //dist_filtered[0] = dist_filtered[i]; 
         //vel[0] = vel[i-1];    // shifts the velocity array back to the 0th element of the array.
         dist_time[0] = dist_time[i];
-        vel[0] = vel[j];
+        velocity_final[0] = velocity_final[i];
+        //vel[0] = vel[j];
         i = 0;              // sets the counter back to the first position. 
-        j = 1;
+        j = 0;
       }
     i++;
     j++;
-     
-  }
   
-  velocity_final_final = velocity_final_final/5; //Average the velocity. 
-  velocity_final[k] = a*velocity_final[k-1] + (1-a)*velocity_final_final;
-  return_vel = velocity_final[k];
   
-  if(k==2)
-  {
-    velocity_final[0] = velocity_final[k];
-    k=0;
-  }
+//  velocity_final_final = velocity_final_final/5; //Average the velocity. 
   
-  k++;
+//  myFile.print(velocity_final_final);
+//  myFile.print(",");
+//  velocity_final_final=0; //set the sum to zero before next iteration
+  //raw_File.print(",");
+  //raw_File.print(",");
+  //raw_File.print(",");
+  //raw_File.println(velocity_final[k],7);
+//  return_vel = velocity_final[k];
+//  
+//  if(k==2)
+//  {
+//    velocity_final[0] = velocity_final[k];
+//    k=0;
+//  }
+//  
+//  k++;
   
   return return_vel;
   
@@ -440,9 +454,16 @@ double velocity_func()
 /*-----------------SENSOR READ FUNCTION----------------*/ 
 double sensordistRead()
 {
-  double actual_relative_dist;
-  actual_relative_dist = ((sensor.getDistance()/1000.00)+0.215605029);
-  return actual_relative_dist; 
+  double sum = 0;
+  double final_relative_dist = 0;
+  for(int i=1;i<=7;i++)
+  {
+  double relative_dist;
+  relative_dist = ((sensor.getDistance()/1000.00)+0.215605029);
+  sum = sum + relative_dist;
+  }
+  final_relative_dist = sum/7;
+  return final_relative_dist; 
 }
 
 
