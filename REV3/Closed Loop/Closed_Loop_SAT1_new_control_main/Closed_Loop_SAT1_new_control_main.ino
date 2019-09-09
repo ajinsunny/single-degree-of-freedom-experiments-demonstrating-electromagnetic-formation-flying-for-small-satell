@@ -37,7 +37,7 @@ unsigned long endtime;
 //unsigned long delta_t1 = 0;
 long loops = 0;
 double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-const float c = 8.5;
+const float c = 8.75;
 float t1;
 float t2;
 double k1a = 28.5;
@@ -51,7 +51,7 @@ double return_vel;
 double V_final;
 float a1 = 0;
 float a2 = 0;
-double desired_dist = 0.280;
+double desired_dist = 0.350;
 double A_v = 0.00;
 double A_d = 0.00;
 double digital_vsine = 0.0;
@@ -142,24 +142,6 @@ void setup() {
 }
 
 
-//struct FB_struct{
-//
-//double fb1;
-//double fb2;
-//
-//};
-//
-//
-//struct FB_struct feedBack(float measured_dist){
-//
-//struct FB_struct new_fb;
-//
-//new_fb.fb1 = k2*dist*dist;
-//new_fb.fb2 = k1*dist*dist*(kr*(dist - desired_dist)) + c*(kr*vel);
-//
-//return new_fb;
-//
-//}
 
 /*--------------------LOOP-----------------------*/
 
@@ -379,7 +361,7 @@ double velocity_func()
 //  { 
 
   dist[i] = sensordistRead();
-  if(dist[i] > 1.50)
+  if(dist[i] > 0.60 | dist[i] < 0.25 )
     {
       dist[i] = dist[i-1]; 
     }
@@ -454,6 +436,7 @@ double velocity_func()
 /*-----------------SENSOR READ FUNCTION----------------*/ 
 double sensordistRead()
 {
+  
   double sum = 0;
   double final_relative_dist = 0;
   for(int i=1;i<=7;i++)
@@ -464,6 +447,7 @@ double sensordistRead()
   }
   final_relative_dist = sum/7;
   return final_relative_dist; 
+  
 }
 
 
