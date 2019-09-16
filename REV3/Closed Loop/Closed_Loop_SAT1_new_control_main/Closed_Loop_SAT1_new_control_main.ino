@@ -8,7 +8,7 @@
    Written for Thesis: One dimensional Electromagnetic Actuation and Pulse Sensing.
    Version: 1.0
    Date: 02-25-2019
-   Last Updated: 07-05-2019
+   Last Updated: 09-09-2019
 
 */
 
@@ -37,7 +37,7 @@ unsigned long endtime;
 //unsigned long delta_t1 = 0;
 long loops = 0;
 double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-const float c = 8.75;
+const float c = 8.5;
 float t1;
 float t2;
 double k1a = 28.5;
@@ -49,6 +49,7 @@ double dist_filtered[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double velocity_final[4] = {0.0,0.0,0.0,0.0};
 double return_vel;
 double V_final;
+double V_sat;
 float a1 = 0;
 float a2 = 0;
 double desired_dist = 0.350;
@@ -113,11 +114,12 @@ void setup() {
   myFile.print(",");
   myFile.print("Velocity"); 
   myFile.print(",");
+  myFile.print("Saturated_Velocity"); 
+  myFile.print(",");
   myFile.print("Amplitude");
   myFile.print(",");
-  myFile.print("Amplitude Digital");
-  myFile.print(",");
-  myFile.println("Sinusoid Signal");
+  myFile.println("Amplitude Digital");
+
   
   raw_File.print("Time");
   raw_File.print(",");
@@ -171,11 +173,21 @@ void loop()
 
       V_final = velocity_func();
       
+      if(abs(V_final) <= 0.0005)
+      {
+        V_sat = 0;
+      }
+
+      else{
+        V_sat = V_final;
+      }
+      
       //Time
       Serial.print("Time: ");
       Serial.println(millis());
       myFile.print(millis());
       myFile.print(",");
+      
     
       //Distance
       Serial.print("Distance: ");
@@ -188,6 +200,13 @@ void loop()
       Serial.println(V_final,8);
       myFile.print(V_final,8);
       myFile.print(",");
+      
+      //Saturated Velocity
+      Serial.print("Saturated Velocity: ");
+      Serial.println(V_sat,8);
+      myFile.print(V_sat,8);
+      myFile.print(",");
+  
   
       //Feedback Amplitude (u_1)
       Serial.print("Amplitude: ");
@@ -205,6 +224,7 @@ void loop()
 //      Serial.println(S.return_voltage_signal(10,A_v),8);
 //      myFile.println(S.return_voltage_signal(10,A_v),8);
 //      
+      
       endtime = millis();
       Serial.print("End: ");
       Serial.println(endtime);
@@ -214,7 +234,7 @@ void loop()
       {
         delay(100-(endtime-startime));
         Serial.println("Action1"); 
-        A_v = feedback_algorithm(dist[i-1],V_final);
+        A_v = feedback_algorithm(dist[i-1],V_sat);
         A_d = (A_v*490)/2.75;  // Converting voltage to digital
         unsigned int endtime2 = millis();
         Serial.print("Diff2: ");
@@ -234,7 +254,7 @@ void loop()
 //       
 //      }
       else{
-        A_v = feedback_algorithm(dist[i-1],V_final);
+        A_v = feedback_algorithm(dist[i-1],V_sat);
         A_d = (A_v*490)/2.75;  
       }
 
@@ -372,7 +392,7 @@ double velocity_func()
 //  raw_File.print(",");
 //  raw_File.print(dist[i],8);
 //  raw_File.print(",");
-   
+
   vel[j] = (dist[i]-dist[i-1])/(dist_time[i]-dist_time[i-1]);
   
   if(vel[j] > 0.20 | vel[j] < -0.20)
@@ -382,6 +402,8 @@ double velocity_func()
   
   velocity_final[i] = a*velocity_final[i-1] + (1-a)*vel[j];
   return_vel = velocity_final[i];
+  
+  
 
 //  raw_File.print(vel[j],8);
 //  raw_File.print(",");
@@ -403,7 +425,7 @@ double velocity_func()
         velocity_final[0] = velocity_final[i];
         //vel[0] = vel[j];
         i = 0;              // sets the counter back to the first position. 
-        j = 0;
+        j = 1;
       }
     i++;
     j++;
@@ -442,7 +464,7 @@ double sensordistRead()
   for(int i=1;i<=7;i++)
   {
   double relative_dist;
-  relative_dist = ((sensor.getDistance()/1000.00)+0.215605029);
+  relative_dist = ((sensor.getDistance()/1000.00)+0.210605029);
   sum = sum + relative_dist;
   }
   final_relative_dist = sum/7;

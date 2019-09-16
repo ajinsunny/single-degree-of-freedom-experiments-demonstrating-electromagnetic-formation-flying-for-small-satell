@@ -8,7 +8,7 @@
    Written for Thesis: One dimensional Electromagnetic Actuation and Pulse Sensing.
    Version: 1.0
    Date: 02-25-2019
-   Last Updated: 07-05-2019
+   Last Updated: 09-09-2019
 */
 
 //HEADER FILES
@@ -38,7 +38,7 @@ unsigned int stamp_time;
 unsigned int time1 = 0;
 long loops = 0;
 double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-const float c = 8.75;
+const float c = 8.5;
 float t1;
 float t2;
 float delta_pos;
@@ -52,13 +52,14 @@ double dist_filtered[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 double velocity_final[4] = {0.0,0.0,0.0,0.0};
 double return_vel;
 double V_final;
+double V_sat;
 float a1 = 0;
 float a2 = 0;
 double desired_dist = 0.350;
 double Amplitude = 0.00;
 double A_v = 0.00;
 double A_d = 0.00;
-unsigned int i = 0;
+unsigned int i = 1;
 unsigned int j = 1;
 unsigned int k = 1;
 char incomingByte;
@@ -114,11 +115,12 @@ void setup() {
   myFile.print(",");
   myFile.print("Velocity"); 
   myFile.print(",");
+  myFile.print("Saturated_Velocity"); 
+  myFile.print(",");
   myFile.print("Amplitude");
   myFile.print(",");
-  myFile.print("Amplitude Digital");
-  myFile.print(",");
-  myFile.println("Sinusoid Signal");
+  myFile.println("Amplitude Digital");
+
 
   
   raw_File.print("Time");
@@ -180,6 +182,15 @@ void loop()
       Serial.println(startime);
       
       V_final = velocity_func();
+      
+      if(abs(V_final) <= 0.0005)
+      {
+        V_sat = 0;
+      }
+
+      else{
+        V_sat = V_final;
+      }
 
       //Time
       Serial.print("Time: ");
@@ -197,6 +208,12 @@ void loop()
       Serial.print("Velocity: ");
       Serial.println(V_final,8);
       myFile.print(V_final,8);
+      myFile.print(",");
+     
+      //Saturated Velocity
+      Serial.print("Saturated Velocity: ");
+      Serial.println(V_sat,8);
+      myFile.print(V_sat,8);
       myFile.print(",");
   
       //Feedback Amplitude (u_2)
@@ -217,6 +234,7 @@ void loop()
 //      myFile.println(S.return_voltage_signal(10,A_v),8);
 
       
+      
       endtime = millis();
       Serial.print("End: ");
       Serial.println(endtime);
@@ -226,7 +244,7 @@ void loop()
       {
         delay(100-(endtime-startime));
         Serial.println("Action1"); 
-        A_v = feedback_algorithm(dist[i-1],V_final);
+        A_v = feedback_algorithm(dist[i-1],V_sat);
         A_d = (A_v*490)/2.75;  // Converting voltage to digital
         unsigned int endtime2 = millis();
         Serial.print("Diff2: ");
@@ -247,7 +265,7 @@ void loop()
 //      }
 
       else{
-        A_v = feedback_algorithm(dist[i-1],V_final);
+        A_v = feedback_algorithm(dist[i-1],V_sat);
         A_d = (A_v*490)/2.75;  
       }
 
@@ -384,20 +402,7 @@ void loop()
 
 double velocity_func()
 {
-//  delta_pos = dist[i] - dist[i - 1];
-//  velocity = delta_pos/0.016;
-//  return velocity;
-//  dist[i] = sensordistRead();
-//  dist_time[i] = millis();
-  
-//  raw_File.print(dist_time[i]);
-//  raw_File.print(",");
-//  raw_File.println(dist[i]);
-  
-//  i++;
-  
-  //for(int k = 0; k < 5; k++)
-  //{
+
     
   dist[i] = sensordistRead();
   if(dist[i] > 0.60 | dist[i] < 0.25)
@@ -433,7 +438,7 @@ double velocity_func()
   //previous_velocity = vel[i-1];
   
 //  raw_File.println(velocity_final[i],7); 
-  velocity_final_final = velocity_final_final + vel[j];
+//  velocity_final_final = velocity_final_final + vel[j];
 
   if (i == 3)
     {
@@ -442,7 +447,7 @@ double velocity_func()
         dist_time[0] = dist_time[i];
         velocity_final[0] = velocity_final[i];
         i = 0;                // sets the counter back to the first position. 
-        j = 0;
+        j = 1;
     }
   i++;
   j++;
@@ -477,7 +482,7 @@ double sensordistRead()
   for(int i=1;i<=7;i++)
   {
   double relative_dist;
-  relative_dist = ((sensor.getDistance()/1000)+0.210612583);
+  relative_dist = ((sensor.getDistance()/1000)+0.210722583);
   sum = sum + relative_dist;
   }
   final_relative_dist = sum/7;
@@ -500,13 +505,13 @@ double feedback_algorithm(double dist, double V_final)
     Amplitude = -1 * k2a * pow(dist,2) * (pow(abs(tanh(kr * (dist - desired_dist)) + c*tanh(kv * V_final)),0.5));
   }
 
-  if(Amplitude > 3.535)
+  if(Amplitude > 3.50)
     {
-    return 3.535;
+    return 3.50;
     }
-    else if(Amplitude < -3.535)
+    else if(Amplitude < -3.50)
     {
-      return -3.535;
+      return -3.50;
     }
   
     else{
