@@ -183,7 +183,7 @@ void loop()
       
       V_final = velocity_func();
       
-      if(abs(V_final) <= 0.0005)
+      if(abs(V_final) <= 0.001)
       {
         V_sat = 0;
       }
@@ -266,7 +266,8 @@ void loop()
 
       else{
         A_v = feedback_algorithm(dist[i-1],V_sat);
-        A_d = (A_v*490)/2.75;  
+        A_d = (A_v*490)/2.75; 
+
       }
 
       
@@ -482,7 +483,7 @@ double sensordistRead()
   for(int i=1;i<=7;i++)
   {
   double relative_dist;
-  relative_dist = ((sensor.getDistance()/1000)+0.210722583);
+  relative_dist = ((sensor.getDistance()/1000)+0.210612583);
   sum = sum + relative_dist;
   }
   final_relative_dist = sum/7;

@@ -152,7 +152,7 @@ void loop()
 {
   while (millis() < period)
   {
-    S.startSinusoid_update(10,A_d);
+    S.startSinusoid1(10);
     if(myFile)
     {
       startime = millis();
@@ -256,9 +256,12 @@ void loop()
 //      }
 
       else{
+        
         A_v = feedback_algorithm(dist[i-1],V_sat);
-        A_d = (A_v*490)/2.75;  
+        A_d = (A_v*490)/2.75; 
+          
       }
+      
 
 
           
@@ -383,10 +386,10 @@ double velocity_func()
 //  { 
 
   dist[i] = sensordistRead();
-  if(dist[i] > 0.60 | dist[i] < 0.25 )
-    {
-      dist[i] = dist[i-1]; 
-    }
+//  if(dist[i] > 0.60 | dist[i] < 0.25 )
+//    {
+//      dist[i] = dist[i-1]; 
+//    }
 // dist_filtered[i] = b*dist_filtered[i-1] + (1-b)*dist[i];
   dist_time[i] = (double)millis()/1000;
    
@@ -397,7 +400,7 @@ double velocity_func()
 
   vel[j] = (dist[i]-dist[i-1])/(dist_time[i]-dist_time[i-1]);
   
-  if(vel[j] > 0.20 | vel[j] < -0.20)
+  if(vel[j] > 0.50 | vel[j] < -0.50)
   {
     vel[j]=vel[j-1];
   }
@@ -466,7 +469,7 @@ double sensordistRead()
   for(int i=1;i<=7;i++)
   {
   double relative_dist;
-  relative_dist = ((sensor.getDistance()/1000.00)+0.195005029);
+  relative_dist = ((sensor.getDistance()/1000.00)+0.195003029);
   sum = sum + relative_dist;
   }
   final_relative_dist = sum/7;
