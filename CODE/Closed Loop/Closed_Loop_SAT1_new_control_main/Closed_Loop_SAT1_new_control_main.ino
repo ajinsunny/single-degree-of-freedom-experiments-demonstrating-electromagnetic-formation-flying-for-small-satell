@@ -1,12 +1,12 @@
 /*
 
-   Small Satellite Position Control Software.
+   Small Satellite Relative Position and Velocity Control Software.
    Filename: Closed_Loop_SAT1_main.ino
    Author: Ajin Sunny
    Last Modified by: Ajin Sunny
 
 
-   Written for Thesis: One dimensional Electromagnetic Actuation and Pulse Sensing.
+   Written for Thesis: Electromagnetic Actuation and Pulse Sensing in Single Degree of Freedom
    Version: 1.0
    Date: 02-25-2019
    Last Updated: 10-03-2019
@@ -24,13 +24,13 @@
 #include "math.h"
 
 
-//Objects for sensor
+//OBJECTS FOR THE PROGRAM
 DFRobotVL53L0X sensor;   // Sensor File Object
 File myFile;             // File Objec
 File raw_File;           // Raw File Object
 
 
-//Variable required for the experiment
+//VARIABLES REQUIRED FOR THE EXPERIMENT
 unsigned long period = 100000;  // Experiment time in milliseconds
 unsigned long startime;
 unsigned long endtime;
@@ -270,7 +270,7 @@ void loop()
 }
 
 
-/*------------- VELOCITY FUNCTION---------------*/
+/*------------------------------------------------------------------------------------------------------------------VELOCITY FUNCTION--------------------------------------------------------------------------------------------------------*/
 
 double velocity_func()
 {
@@ -353,7 +353,7 @@ double velocity_func()
 }
 
 
-/*-----------------SENSOR READ FUNCTION----------------*/ 
+/*------------------------------------------------------------------------------------------------------------------SENSOR READ FUNCTION--------------------------------------------------------------------------------------------------------*/
 double sensordistRead()
 {
   
@@ -373,7 +373,7 @@ double sensordistRead()
 
 
 
-/*----------------FEEDBACK ALGORITHM FUNCTION -----------------*/
+/*------------------------------------------------------------------------------------------------------------------FEEDBACK ALGORITHM FUNCTION--------------------------------------------------------------------------------------*/
 double feedback_algorithm(double dist, double V_final)
 {
   
@@ -412,6 +412,7 @@ double feedback_algorithm(double dist, double V_final)
 
 
 
+/*------------------------------------------------------------------This is another feedback function just for refernce--------------------------------------------------------------------------------------*/
 
 
 

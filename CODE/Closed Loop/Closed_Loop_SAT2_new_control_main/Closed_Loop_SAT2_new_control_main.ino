@@ -1,14 +1,15 @@
 /*
-   Small Satellite Position Control Software.
+   Small Satellite Relative Position and Velocity Control Software.
    Filename: Closed_Loop_SAT2_main.ino
    Author: Ajin Sunny
    Last Modified by: Ajin Sunny
 
 
-   Written for Thesis: One dimensional Electromagnetic Actuation and Pulse Sensing.
+   Written for Thesis: Electromagnetic Actuation and Pulse Sensing in Single Degree of Freedom
    Version: 1.0
    Date: 02-25-2019
-   Last Updated: 09-09-2019
+   Last Updated: 10-03-2019
+   
 */
 
 //HEADER FILES
@@ -21,12 +22,13 @@
 #include "DFRobot_VL53L0X.h" 
 #include "math.h"
 
+
+//OBJECTS FOR THE PROGRAM
 DFRobotVL53L0X sensor;   // SENSOR OBJECT
 File myFile;             // SAT DATA FILE OBJECT
 File raw_File;           // RAW FILE OBJECT
 
-
-
+//VARIABLES REQUIRED FOR THE EXPERIMENT
 unsigned long period = 100000; // Experiment time in milliseconds
 unsigned int startime = 0;
 unsigned int endtime = 0;
@@ -71,7 +73,7 @@ double a = 0.97;
 double previous_velocity = 0.00;
 double current_velocity = 0.00;
 
-/*--------------------SETUP-------------------------*/
+/*------------------------------------------------------------------------------------------------------------------SETUP--------------------------------------------------------------------------------------------------------*/
 void setup() {
 
   analogReadResolution(10);
@@ -154,7 +156,7 @@ void setup() {
 
 
 
-/*--------------------LOOP-----------------------*/
+/*------------------------------------------------------------------------------------------------------------------MAIN LOOP--------------------------------------------------------------------------------------------------------*/
 
 void loop()
 {
@@ -250,7 +252,9 @@ void loop()
         Serial.print("Diff2: ");
         Serial.println(endtime2-startime); 
       }
-      
+
+/*--------------------- This piece of code is just incase of you go over 100ms, you can modify it to break out of the loop if you go over 100ms*/
+
 //
 //      if((endtime-startime) > 100)
 //      {
@@ -270,70 +274,6 @@ void loop()
 
       }
 
-      
-      
-//      int waitime = 100-(endtime-startime);
-//      Serial.print("Wait: ");
-//      Serial.println(waitime);
-        
-      
-    
-    
-//    // AMPLITUDE UPDATE 
-      
-      //Time
-//      Serial.print("Time: ");
-//      Serial.println(millis());
-//      Serial.print(millis()/1000);
-//      Serial.print('.');
-//      Serial.println(millis()%1000,4);
-//      myFile.print(millis()/1000);
-//      myFile.print('.');
-//      myFile.print(millis()%1000,4);
-//      myFile.print(",");
-//    
-//      //Distance
-//      Serial.print("Distance: ");
-//      Serial.println(dist[i],4);
-//      myFile.print(dist[i],4);
-//      myFile.print(",");
-//    
-//      //Velocity
-//      Serial.print("Velocity: ");
-//      Serial.println(V_final,4);
-//      myFile.print(V_final,4);
-//      myFile.print(",");
-//  
-//      //Current Amplitude
-//      Serial.print("Amplitude: ");
-//      Serial.println(A_v,4);
-//      myFile.print(A_v,4);
-//      myFile.print(",");
-//      
-//      //Digital Amplitude
-//      Serial.print("Digital Voltage Amplitude: ");
-//      Serial.println(A_d,4);
-//      myFile.print(A_d,4);
-//      myFile.print(",");
-//  
-//      //Sinusoid Signal
-//      Serial.print("Voltage Signal");
-//      Serial.println(S.return_voltage_signal(10,A_v),4);
-//      myFile.println(S.return_voltage_signal(10,A_v),4);
-      
-    
-      //stamp_time = millis();
-  
-    
-    //i++;
-
-    
-//    if (i >= 2)
-//    {
-//      i = 0;
-//    }
-//    A = feedback_algorithm(dist[i], vel);
-//    S.stopSinusoid();
   
   }
   S.stopSinusoid();
@@ -346,7 +286,7 @@ void loop()
   exit(0);
 }
 
-/*--------------------SENSOR READ FUNCTION--------*/
+/*--------------------SENSOR READ FUNCTION (N/A - Here just for reference)--------*/
 
 //void sensorRead()
 //{
@@ -399,7 +339,7 @@ void loop()
 
 
 
-/*-------------VELOCITY FUNCTION---------------*/
+/*-----------------------------------------------------------------------------------------------------------------VELOCITY FUNCTION-------------------------------------------------------------------------------------------------*/
 
 double velocity_func()
 {
@@ -475,7 +415,7 @@ double velocity_func()
 }
 
 
-/*-------------SENSOR READ FUNCTION-----------*/ 
+/*-----------------------------------------------------------------------------------------------------------------SENSOR READ FUNCTION---------------------------------------------------------------------------------------------*/
 double sensordistRead()
 { 
   double sum = 0;
@@ -491,7 +431,8 @@ double sensordistRead()
 }
 
 
-/*----------------FEEDBACK ALGORITHM FUNCTION -----------------*/
+/*-----------------------------------------------------------------------------------------------------------------FEEDBACK ALGORITHM FUNCTION--------------------------------------------------------------------------------------*/
+
 double feedback_algorithm(double dist, double V_final)
 {
   
@@ -532,13 +473,7 @@ double feedback_algorithm(double dist, double V_final)
 }
 
 
-
-
-
-
-
-
-
+/*------------------------------------------------------------------This is another feedback function just for refernce--------------------------------------------------------------------------------------------------------------*/
 
 
 
