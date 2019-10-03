@@ -9,7 +9,7 @@
    Written for Thesis: One dimensional Electromagnetic Actuation and Pulse Sensing.
    Version: 1.0
    Date: 02-25-2019
-   Last Updated: 09-09-2019
+   Last Updated: 10-03-2019
 
 */
 
@@ -24,18 +24,16 @@
 #include "math.h"
 
 
-
+//Objects for sensor
 DFRobotVL53L0X sensor;   // Sensor File Object
 File myFile;             // File Objec
 File raw_File;           // Raw File Object
 
+
+//Variable required for the experiment
 unsigned long period = 100000;  // Experiment time in milliseconds
 unsigned long startime;
 unsigned long endtime;
-//unsigned long lastTick;
-//unsigned long prev_millis = 0;
-//unsigned long delta_t = 0;
-//unsigned long delta_t1 = 0;
 long loops = 0;
 double dist[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 const float c = 8.5;
@@ -71,7 +69,10 @@ double a = 0.97;
 double previous_velocity = 0.00;
 double current_velocity = 0.00;
 
-/*--------------------SETUP-------------------------*/
+
+
+
+/*------------------------------------------------------------------------------------------------------------------SETUP--------------------------------------------------------------------------------------------------------*/
 void setup() {
 
   analogReadResolution(10);
@@ -146,7 +147,7 @@ void setup() {
 
 
 
-/*--------------------LOOP-----------------------*/
+/*------------------------------------------------------------------------------------------------------------------MAIN LOOP--------------------------------------------------------------------------------------------------------*/
 
 void loop()
 {
@@ -156,6 +157,7 @@ void loop()
     if(myFile)
     {
       startime = millis();
+      
     //delay(18);
 //    Serial.print("Voltage value: ");
 //    Serial.println(S.return_voltage());
@@ -169,68 +171,64 @@ void loop()
 //    }
 //
 //    total_relative_dist = total_relative_dist/7;
+
       Serial.print("Start: ");
       Serial.println(startime);
 
       V_final = velocity_func();
       
-      if(abs(V_final) <= 0.001)
+      if(abs(V_final) <= 0.001) //DeadZone Implementation
       {
-        V_sat = 0;
+        V_sat = 0;//The velocity variable that passes to the control function {feedback_algorrithm}
       }
 
       else{
         V_sat = V_final;
       }
       
-      //Time
+      //Print Time to SD Card
       Serial.print("Time: ");
       Serial.println(millis());
       myFile.print(millis());
       myFile.print(",");
       
     
-      //Distance
+      //Print Relative position to SD Card
       Serial.print("Distance: ");
       Serial.println(dist[i-1],8);
       myFile.print(dist[i-1],8);
       myFile.print(",");
     
-      //Velocity
+      //Print Pre-saturated velocity to SD Card
       Serial.print("Velocity: ");
       Serial.println(V_final,8);
       myFile.print(V_final,8);
       myFile.print(",");
       
-      //Saturated Velocity
+      //Print saturated velocity(ie. deadzoned velocity) to SD Card
       Serial.print("Saturated Velocity: ");
       Serial.println(V_sat,8);
       myFile.print(V_sat,8);
       myFile.print(",");
   
   
-      //Feedback Amplitude (u_1)
+      //Print Feedback Amplitude (u_1) to the SD card and Serial Monitor
       Serial.print("Amplitude: ");
       Serial.println(A_v,8);
       myFile.print(A_v,8);
       myFile.print(",");
       
-      //Feedback Digital Amplitude (For Arduino)
+      //Print Feedback Digital Amplitude (in digital For Arduino) to SD Card and Serial Monitor
       Serial.print("Amplitude Digital: ");
       Serial.println(A_d,8);
       myFile.println(A_d,8);
-      
-        //Sinusoid Signal
-//      Serial.print("Sinusoidal Signal");
-//      Serial.println(S.return_voltage_signal(10,A_v),8);
-//      myFile.println(S.return_voltage_signal(10,A_v),8);
-//      
       
       endtime = millis();
       Serial.print("End: ");
       Serial.println(endtime);
       Serial.print("Diff1: ");
       Serial.println(endtime-startime);
+      
       if((endtime-startime) < 100)
       {
         delay(100-(endtime-startime));
@@ -243,6 +241,7 @@ void loop()
       }
       
 
+/*--------------------- This piece of code is just incase of you go over 100ms, you can modify it to break out of the loop if you go over 100ms*/
 //      if((endtime-startime) > 100)
 //      {
 //        delay((endtime-startime)-100);
@@ -260,60 +259,7 @@ void loop()
         A_d = (A_v*490)/2.75;  
       }
 
-
-          
-//      int waitime = 100-(endtime-startime);
-//      Serial.print("Wait: ");
-//      Serial.println(waitime);
-
-    
-    
-    /// AMPLITUDE UPDATE   
-    
-//    //Time
-//    Serial.print("Time: ");
-//    Serial.print(millis(),8);
-//    myFile.print(millis(),8);
-//    myFile.print(",");
-//  
-//    //Distance
-//    Serial.print("Distance: ");
-//    Serial.println(dist[i],8);
-//    myFile.print(dist[i],8);
-//    myFile.print(",");
-//  
-//   //Velocity
-//    Serial.print("Velocity: ");
-//    Serial.println(V_final,8);
-//    myFile.print(V_final,8);
-//    myFile.print(",");
-//
-//    //Current Amplitude
-//    Serial.print("Amplitude: ");
-//    Serial.println(A_v,8);
-//    myFile.print(A_v,8);
-//    myFile.print(",");
-//
-//    //Digital Amplitude
-//    Serial.print("Digital Voltage Amplitude: ");
-//    Serial.println(A_d,8);
-//    myFile.print(A_d,8);
-//    myFile.print(",");
-//
-//    //Sinusoid Signal
-//    Serial.print("Voltage Signal");
-//    Serial.println(S.return_voltage_signal(10,A_v),8);
-//    myFile.println(S.return_voltage_signal(10,A_v),8);
-//    
-//
-//    
-//   // i++;
-//    
-////    if (i >= 2)
-////    {
-////      i = 0;
-////    }
-////    A = feedback_algorithm(dist[i], vel); 
+   
      
   }
   S.stopSinusoid(); 
@@ -323,56 +269,6 @@ void loop()
   exit(0);
 }
 
-
-/*--------------------SENSOR READ FUNCTION--------*/
-//void sensorRead()
-//{
-//
-//
-//  //S.startSinusoid(100);
-//  //delay(1000);
-//  unsigned long startTime = millis();
-//  unsigned long endTime = startTime + period;
-//  myFile = SD.open("data.csv", FILE_WRITE);
-//
-//  //unsigned long current_millis = 0;
-//  //unsigned long dist_1;
-//
-//  while (millis() < endTime) {
-//    //countDown--;
-//    {
-//      //S.startSinusoid(100, 300);
-//      if (myFile)
-//      {
-//        //S.startSinusoid(100, 300);
-//        Serial.print("Distance: ");
-//        Serial.println(sensor.getDistance());
-//        delta_t = millis() - prev_millis;
-//        prev_millis = millis();
-//        Serial.print("Time:");
-//        Serial.println(delta_t);
-//        //myFile.println(sensor.getDistance());
-//        //computation from feedback control for new sinusoid.
-//        //S.setAmplitude(700);
-//
-//      }
-//
-//
-//
-//    }
-//
-//    //lastTick += 1000;
-//    //delay(100);
-//  }
-//
-//  S.stopSinusoid();
-//
-//  //myFile.close();
-//  Serial.println("-------------------------DONE----------------------M------");
-//  Serial.println("Total Time Lapsed: " + (String)period + "ms has lapsed");
-//
-//
-//}
 
 /*------------- VELOCITY FUNCTION---------------*/
 
