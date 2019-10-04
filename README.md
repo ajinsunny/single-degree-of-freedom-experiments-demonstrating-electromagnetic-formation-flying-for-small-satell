@@ -1,6 +1,6 @@
 # Electromagnetic Actuation and Pulse Sensing Experiment in Single Degree of Freedom
 
-This project is dedicated for Electromagnetic Actuation and Pulse Sensing in Single Degree of Freedom. The program written in this repository is for Experiment Setup that was built by [Ajin Sunny]https://github.com/ajinsunny . The program was originally written by [Ajin Sunny]https://github.com/ajinsunny. The program is last uploaded on 10-04-2019. Future commits to this program will be available on github. 
+This project is dedicated for Electromagnetic Actuation and Pulse Sensing in Single Degree of Freedom. The program written in this repository is for Experiment Setup that was built by [Ajin Sunny](https://github.com/ajinsunny). The program was originally written by [Ajin Sunny](https://github.com/ajinsunny). The program is last uploaded on 10-04-2019. Future commits to this program will be available on github. 
 
 ## Experimental Setup (TBW)
 
@@ -28,15 +28,15 @@ An Arduino Due Setup mentioned in the Hardware section is required for deploymen
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+Please read for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## Versioning 
 
 ## Authors
 
-* **Ajin Sunny** - *Initial work* - [Ajin Sunny]https://github.com/ajinsunny
+* **Ajin Sunny** - *Initial work* - [Ajin Sunny](https://github.com/ajinsunny)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [link to the contributors to be added for future] who participated in this project.
 
 ## License
 
@@ -44,7 +44,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE.md](LIC
 
 ## Acknowledgments
 
-* Hat tip to anyone whose code was used especially [Charles]https://github.com/cmasenas/
+* Hat tip to anyone whose code was used especially [Charles](https://github.com/cmasenas/)
 * 
 * etc
 
