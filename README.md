@@ -13,24 +13,26 @@ This project is dedicated for Electromagnetic Actuation and Pulse Sensing in Sin
 3. XBee Series 1 RF Module. 
 4. Arduino Wireless SD Shield.
 5. Lexan Polycabornate sheet. 
-6. 3D Printer Coil Frame. 
-7. 
+6. 3D Printed Coil Frame. 
+7. DC-DC Boost Conveter.
+8. Copley Controls Amplifier. 
+9. Lithium-ion Polymer Battery Pack. 
+10. 22AWG Magnet Wire. 
+11. Connecting/Soldering Wires. 
 
 ### Installing
 
-Please either clone a copy of this program or pulll from a github version control system on your computer to start making edits to the program. 
+Refer to the folder [CODE](https://github.com/ajinsunny/EAS_Code/tree/master/CODE) for the controls experiment code.
 
 ## Deployment
 
-An Arduino Due Setup mentioned in the Hardware section is required for deployment of this software. 
+Deployed to Arduino Due Microcontroller using the Programming USB Port. 
 
-
-## Built With
 
 
 ## Contributing
 
-Please read for details on our code of conduct[TBW], and the process for submitting pull requests to us.
+Contribution for Small Satellite Formation Project by NASA. 
 
 ## Versioning 
 
