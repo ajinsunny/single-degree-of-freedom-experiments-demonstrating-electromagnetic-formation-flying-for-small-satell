@@ -4,15 +4,17 @@ This project is dedicated for Electromagnetic Actuation and Pulse Sensing in Sin
 
 ## Experimental Setup (TBW)
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+
 
 ### Hardware (TBW)
 
-What things you need to install the software and how to install them
-
-``
-Give examples
-```
+1. Arduino Microcontroller
+2. STM VL53L0X Laser-Range Finding sensor. 
+3. XBee Series 1 RF Module. 
+4. Arduino Wireless SD Shield.
+5. Lexan Polycabornate sheet. 
+6. 3D Printer Coil Frame. 
+7. 
 
 ### Installing
 
