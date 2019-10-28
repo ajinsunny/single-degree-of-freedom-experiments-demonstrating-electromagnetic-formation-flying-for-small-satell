@@ -32,7 +32,7 @@ Deployed to Arduino Due Microcontroller using the Programming USB Port.
 
 ## Contributing
 
-Contribution for Small Satellite Formation Project by NASA. 
+Contribution for Small Satellite Formations Project by NASA. 
 
 ## Versioning 
 
