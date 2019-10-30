@@ -40,8 +40,6 @@ Contribution for Small Satellite Formations Project by NASA.
 
 * **Ajin Sunny** - *Initial work* - [Ajin Sunny](https://github.com/ajinsunny)
 
-See also the list of [link to the contributors to be added for future] who participated in this project.
-
 ## License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE.md](LICENSE.md) file for details
