@@ -6,7 +6,9 @@
    Last Modified by: Ajin Sunny
 
 
-   Written for Thesis: One dimensional Electromagnetic Actuation and Pulse Sensing.
+   Written for Thesis: Single-Degree-of-Freedom Experiments Demonstrating
+                       Electromagnetic Formation Flying for Small Satellite Swarms Using
+                       Piecewise-Sinusoidal Controls
    Version: 1.0
    Date: 02-25-2019
    Last Updated: 09-09-2019
