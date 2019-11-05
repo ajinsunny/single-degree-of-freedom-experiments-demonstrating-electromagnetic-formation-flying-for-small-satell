@@ -26,13 +26,13 @@ Refer to the folder [CODE](https://github.com/ajinsunny/EAS_Code/tree/master/COD
 
 ## Deployment
 
-Deployed to Arduino Due Microcontroller using the Programming USB Port. 
+Deployed to Arduino Due microcontroller using the programming USB port. 
 
 
 
 ## Contributing
 
-Contribution for Small Satellite Formations Project by NASA. 
+Contribution for Small Satellite Formations project by NASA. 
 
 ## Versioning 
 
