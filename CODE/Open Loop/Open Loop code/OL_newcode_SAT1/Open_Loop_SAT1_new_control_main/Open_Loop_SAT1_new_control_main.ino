@@ -1,7 +1,7 @@
 /*
 
    Small Satellite Position Control Software.
-   Filename: Closed_Loop_SAT1_main.ino
+   Filename: Open_Loop_SAT1_main.ino
    Author: Ajin Sunny
    Last Modified by: Ajin Sunny
 
@@ -29,7 +29,7 @@ DFRobotVL53L0X sensor;   // Sensor File Object
 File myFile;             // File Objec
 File raw_File;           // Raw File Object
 
-unsigned long period = 100000;  // Experiment time in milliseconds
+unsigned long period = 50000;  // Experiment time in milliseconds
 unsigned long startime;
 unsigned long endtime;
 //unsigned long lastTick;
@@ -122,13 +122,13 @@ void setup() {
   myFile.println("Amplitude Digital");
 
   
-  raw_File.print("Time");
-  raw_File.print(",");
-  raw_File.print("Raw Distance");
-  raw_File.print(",");
-  raw_File.print("Raw Velocity");
-  raw_File.print(",");
-  raw_File.println("Raw Filtered Velocity");
+//  raw_File.print("Time");
+//  raw_File.print(",");
+//  raw_File.print("Raw Distance");
+//  raw_File.print(",");
+//  raw_File.print("Raw Velocity");
+//  raw_File.print(",");
+//  raw_File.println("Raw Filtered Velocity");
   
 //  raw_File.println("Filtered Velocity");
 
@@ -509,17 +509,6 @@ double feedback_algorithm(double dist, double V_final)
 //    {return Amplitude;}
 
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 //float feedback_algorithm(float dist, float velocity)
