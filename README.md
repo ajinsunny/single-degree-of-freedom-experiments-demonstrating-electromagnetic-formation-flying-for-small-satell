@@ -1,34 +1,38 @@
-# Electromagnetic Actuation and Pulse Sensing Experiment in Single Degree of Freedom
+# Single-Degree-of-Freedom Experiments Demonstrating Electromagnetic Formation Flying for Small Satellite Swarms Using Piecewise-Sinusoidal Controls
 
 This project is dedicated for Electromagnetic Actuation and Pulse Sensing in Single Degree of Freedom. The program written in this repository is for Experiment Setup that was built by [Ajin Sunny](https://github.com/ajinsunny). The program was originally written by [Ajin Sunny](https://github.com/ajinsunny). The program is last uploaded on 10-04-2019. Future commits to this program will be available on github. 
 
 ## Experimental Setup (TBW)
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+
 
 ### Hardware (TBW)
 
-What things you need to install the software and how to install them
-
-``
-Give examples
-```
+1. Arduino Microcontroller
+2. STM VL53L0X Laser-Range Finding sensor. 
+3. XBee Series 1 RF Module. 
+4. Arduino Wireless SD Shield.
+5. Lexan Polycabornate sheet. 
+6. 3D Printed Coil Frame. 
+7. DC-DC Boost Conveter.
+8. Copley Controls Amplifier. 
+9. Lithium-ion Polymer Battery Pack. 
+10. 22AWG Magnet Wire. 
+11. Connecting/Soldering Wires. 
 
 ### Installing
 
-Please either clone a copy of this program or pulll from a github version control system on your computer to start making edits to the program. 
+Refer to the folder [CODE](https://github.com/ajinsunny/EAS_Code/tree/master/CODE) for the controls experiment code.
 
 ## Deployment
 
-An Arduino Due Setup mentioned in the Hardware section is required for deployment of this software. 
+Deployed to Arduino Due microcontroller using the programming USB port. 
 
-
-## Built With
 
 
 ## Contributing
 
-Please read for details on our code of conduct[TBW], and the process for submitting pull requests to us.
+Contribution for Small Satellite Formations project by NASA. 
 
 ## Versioning 
 
@@ -36,15 +40,11 @@ Please read for details on our code of conduct[TBW], and the process for submitt
 
 * **Ajin Sunny** - *Initial work* - [Ajin Sunny](https://github.com/ajinsunny)
 
-See also the list of [link to the contributors to be added for future] who participated in this project.
-
 ## License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
 
-* Hat tip to anyone whose code was used especially [Charles](https://github.com/cmasenas/)
-* 
-* etc
+* Especially [Charles](https://github.com/cmasenas/) for his contributions to the SineWaveDue Library
 
