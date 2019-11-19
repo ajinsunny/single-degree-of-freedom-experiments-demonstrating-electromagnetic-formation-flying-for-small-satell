@@ -32,7 +32,7 @@ Deployed the program to Arduino Due microcontroller using the programming USB po
 
 ## Contributing
 
-Contribution for Small Satellite Formations project by NASA. 
+Contribution for Small Satellite Formations project by NASA.
 
 ## Versioning 
 
@@ -46,5 +46,5 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE.md](LIC
 
 ## Acknowledgments
 
-* Especially [Charles](https://github.com/cmasenas/) for his contributions to the SineWaveDue Library
+* Especially [Charles](https://github.com/cmasenas/) for his contributions to the SineWaveDue Library.
 
