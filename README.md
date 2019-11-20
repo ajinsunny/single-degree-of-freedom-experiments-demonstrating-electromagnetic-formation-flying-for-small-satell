@@ -22,7 +22,7 @@ This project is dedicated for Electromagnetic Actuation and Pulse Sensing in Sin
 
 ### Installing
 
-Refer to the folder [CODE](https://github.com/ajinsunny/EAS_Code/tree/master/CODE) for the controls experiment code.
+Refer to the folder [CODE](https://github.com/ajinsunny/EAS_Code/tree/master/CODE) for open-loop and closed-loop controls experiment code.
 
 ## Deployment
 
