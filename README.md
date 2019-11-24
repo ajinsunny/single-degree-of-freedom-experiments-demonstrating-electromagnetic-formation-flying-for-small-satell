@@ -2,11 +2,11 @@
 
 This project is dedicated for Electromagnetic Actuation and Pulse Sensing in Single Degree of Freedom. The program written in this repository is for Experiment Setup that was built by [Ajin Sunny](https://github.com/ajinsunny). The program was originally written by [Ajin Sunny](https://github.com/ajinsunny). The program was last uploaded on 10-04-2019. 
 
-## Experimental Setup (TBW)
+## Experimental Setup 
 
 
 
-### Hardware (TBW)
+### Hardware
 
 1. Arduino Microcontroller
 2. STM VL53L0X Laser-Range Finding sensor. 
