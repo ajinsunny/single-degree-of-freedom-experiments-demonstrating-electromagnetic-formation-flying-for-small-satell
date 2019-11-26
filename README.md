@@ -1,6 +1,6 @@
 # Single-Degree-of-Freedom Experiments Demonstrating Electromagnetic Formation Flying for Small Satellite Swarms Using Piecewise-Sinusoidal Controls
 
-This project is dedicated for Electromagnetic Actuation and Pulse Sensing in Single Degree of Freedom. The program written in this repository is for Experiment Setup that was built by [Ajin Sunny](https://github.com/ajinsunny). The program was originally written by [Ajin Sunny](https://github.com/ajinsunny). The program was last uploaded on 10-04-2019. 
+This project is dedicated for Electromagnetic Actuation and Pulse Sensing in Single Degree of Freedom. The program written in this repository is for Experiment Setup that was built by [Ajin Sunny](https://github.com/ajinsunny). The program was originally written by [Ajin Sunny](https://github.com/ajinsunny). The program was last uploaded on 10-04-2019 
 
 ## Experimental Setup 
 
