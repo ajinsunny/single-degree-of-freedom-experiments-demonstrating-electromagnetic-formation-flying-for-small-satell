@@ -8,7 +8,7 @@ This project is dedicated for Electromagnetic Actuation and Pulse Sensing in Sin
 
 ### Hardware
 
-1. Arduino Microcontroller
+1. Arduino Microcontroller.
 2. STM VL53L0X Laser-Range Finding sensor. 
 3. XBee Series 1 RF Module. 
 4. Arduino Wireless SD Shield.
