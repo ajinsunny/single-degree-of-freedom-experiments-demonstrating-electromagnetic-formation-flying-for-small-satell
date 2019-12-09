@@ -3,8 +3,7 @@
 This project is dedicated for Electromagnetic Actuation and Pulse Sensing in Single Degree of Freedom. The program written in this repository is for Experiment Setup that was built by [Ajin Sunny](https://github.com/ajinsunny). The program was originally written by [Ajin Sunny](https://github.com/ajinsunny). The program was last uploaded on 10-04-2019. 
 
 ## Experimental Setup 
-
-
+The experimental setup consists of the assembly of all the hardware components listed in the next section.
 
 ### Hardware
 
