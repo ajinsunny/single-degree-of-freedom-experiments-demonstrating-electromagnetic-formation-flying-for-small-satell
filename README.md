@@ -35,6 +35,7 @@ Contribution towards [Coordinated Position and Attitude Control for Formations o
 
 ## Author
 * **Ajin Sunny** - *Initial work* - [Ajin Sunny](https://github.com/ajinsunny)
+* **Piper Cannon** - *Future Work* - [Piper Cannon](https://github.com/pipercannon)
 
 ## License
 
