@@ -5,7 +5,7 @@ This project is dedicated for Electromagnetic Actuation and Pulse Sensing in Sin
 ## Experimental Setup 
 The experimental setup consists of the assembly of all the hardware components listed in the next section.
 
-### Hardware
+## Hardware
 
 1. [Arduino Microcontroller](https://store.arduino.cc/usa/due)
 2. [STM VL53L0X Laser-Range Finding sensor](https://www.dfrobot.com/product-1706.html)
