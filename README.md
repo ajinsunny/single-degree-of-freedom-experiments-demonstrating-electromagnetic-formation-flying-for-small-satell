@@ -27,7 +27,7 @@ Refer to the folder [CODE](https://github.com/ajinsunny/EAS_Code/tree/master/COD
 
 ## Deployment
 
-Deployed the program to Arduino Due microcontroller using the programming USB port.
+Deployed the program to Arduino Due microcontroller using the programming USB port. 
 
 ## Contributing
 Contribution towards [Coordinated Position and Attitude Control for Formations of Small Satellites](https://uknow.uky.edu/research/nasa-kentucky-epscor-program-receives-850000-new-awards)
