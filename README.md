@@ -1,12 +1,13 @@
 # Single-Degree-of-Freedom Experiments Demonstrating Electromagnetic Formation Flying for Small Satellite Swarms Using Piecewise-Sinusoidal Controls
-
+---
 This project is dedicated for Electromagnetic Actuation and Pulse Sensing in Single Degree of Freedom. The program written in this repository is for Experiment Setup that was built by [Ajin Sunny](https://github.com/ajinsunny). The program was originally written by [Ajin Sunny](https://github.com/ajinsunny). The program was last uploaded on 10-04-2019. 
 
 ## Experimental Setup 
+---
 The experimental setup consists of the assembly of all the hardware components listed in the next section.
 
 ## Hardware
-
+---
 1. [Arduino Microcontroller](https://store.arduino.cc/usa/due)
 2. [STM VL53L0X Laser-Range Finding sensor](https://www.dfrobot.com/product-1706.html)
 3. [XBee Series 1 RF Module](https://www.sparkfun.com/products/retired/8665)
@@ -22,26 +23,28 @@ The experimental setup consists of the assembly of all the hardware components l
 13. [Ring Terminal-wide diameter](https://www.digikey.com/products/en?keywords=A09071-ND)
 
 ### Installing
-
+---
 Refer to the folder [CODE](https://github.com/ajinsunny/EAS_Code/tree/master/CODE) for open-loop and closed-loop controls experiment code.
 
 ## Deployment
-
+---
 Deployed the program to Arduino Due microcontroller using the programming USB port. 
 
 ## Contributing
+---
 Contribution towards [Coordinated Position and Attitude Control for Formations of Small Satellites](https://uknow.uky.edu/research/nasa-kentucky-epscor-program-receives-850000-new-awards)
 
 
 ## Author
+---
 * **Ajin Sunny** - *Initial work* - [Ajin Sunny](https://github.com/ajinsunny)
 * **Piper Cannon** - *Future Work* - [Piper Cannon](https://github.com/pipercannon)
 
 ## License
-
+---
 This project is licensed under the Apache License 2.0 - see the [LICENSE.md](LICENSE.md) file for details.
 
 ## Acknowledgments
-
+---
 * Especially [Charles](https://github.com/cmasenas/) for his contributions to the SineWaveDue Library.
 
