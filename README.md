@@ -22,7 +22,7 @@ The experimental setup consists of the assembly of all the hardware components l
 12. [Ring Terminal-narrow diameter](https://www.digikey.com/products/en?keywords=328377-ND)
 13. [Ring Terminal-wide diameter](https://www.digikey.com/products/en?keywords=A09071-ND)
 
-### Installing
+## Installing
 ---
 Refer to the folder [CODE](https://github.com/ajinsunny/EAS_Code/tree/master/CODE) for open-loop and closed-loop controls experiment code.
 
