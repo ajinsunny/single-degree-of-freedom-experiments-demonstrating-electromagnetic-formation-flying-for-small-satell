@@ -46,5 +46,5 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE.md](LIC
 
 ## Acknowledgments
 ---
-*[Charles](https://github.com/cmasenas/) for his contributions to the SineWaveDue Library.
+* [Charles](https://github.com/cmasenas/) for his contributions to the SineWaveDue Library.
 
