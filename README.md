@@ -24,7 +24,7 @@ The experimental setup consists of the assembly of all the hardware components l
 
 ## Installing
 ---
-Refer to the folder [CODE](https://github.com/ajinsunny/EAS_Code/tree/master/CODE) for open-loop and closed-loop controls experiment code.
+Refer to the folder [CODE](https://github.com/ajinsunny/Single-Degree-of-Freedom-Experiments-Demonstrating-Electromagnetic-Formation-Flying-for-Small-Satell/tree/master/src_code) for open-loop and closed-loop controls experiment code.
 
 ## Deployment
 ---
