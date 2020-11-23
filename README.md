@@ -1,6 +1,35 @@
-# Single-Degree-of-Freedom Experiments Demonstrating Electromagnetic Formation Flying for Small Satellite Swarms Using Piecewise-Sinusoidal Controls
+# NASA Kentucky EPSCoR Program - Electromagnetic Actuation System
+
+## Single-Degree-of-Freedom Experiments Demonstrating Electromagnetic Formation Flying for Small Satellite Swarms Using Piecewise-Sinusoidal Controls
 ---
 This project is dedicated for Electromagnetic Actuation and Pulse Sensing in Single Degree of Freedom. The program written in this repository is for Experiment Setup that was built by [Ajin Sunny](https://github.com/ajinsunny). The program was originally written by [Ajin Sunny](https://github.com/ajinsunny). The program was last uploaded on 10-04-2019. 
+
+If you use this code in your research, please cite our papers:
+
+Sunny, Ajin. "Single-degree-of-freedom Experiments Demonstrating Electromagnetic Formation Flying for Small Satellite Swarms Using Piecewise-sinusoidal Controls." (2019).
+
+Abbasi, Zahra, et al. "Relative-position formation control of satellites using electromagnetic actuation with piecewise-sinusoidal controls." 2020 American Control Conference (ACC). IEEE, 2020.
+
+```bibtex
+
+
+@ARTICLE{sunny2019single,
+  title={Single-degree-of-freedom Experiments Demonstrating Electromagnetic Formation Flying for Small Satellite Swarms Using Piecewise-sinusoidal Controls},
+  author={Sunny, Ajin},
+  year={2019}
+}
+
+
+@inproceedings{abbasi2020relative,
+  title={Relative-position formation control of satellites using electromagnetic actuation with piecewise-sinusoidal controls},
+  author={Abbasi, Zahra and Sunny, Ajin and Hoagg, Jesse B and Seigler, T Michael},
+  booktitle={2020 American Control Conference (ACC)},
+  pages={4951--4956},
+  year={2020},
+  organization={IEEE}
+}
+
+```
 
 ## Experimental Setup 
 ---
